@@ -1,1 +1,536 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Apple ID-style Sign Up — Accessible Demo (Responsive)</title>
+  <meta name="color-scheme" content="dark light" />
+  <meta name="description" content="Modern, responsive & accessible Apple ID-style sign up (demo only)." />
+  <link rel="icon" href="data:," />
+  <style>
+    /* ========== Design Tokens ========= */
+    :root{
+      --bg:#0f172a; --card:#111827; --muted:#94a3b8; --text:#e5e7eb;
+      --accent:#60a5fa; --accent-2:#2563eb; --ok:#22c55e; --warn:#f59e0b; --err:#ef4444;
+      --ring: color-mix(in hsl, var(--accent) 35%, transparent);
+      --radius:16px;
+      --space-1:8px; --space-2:12px; --space-3:16px; --space-4:20px; --space-5:24px;
+      --shadow: 0 8px 30px rgba(0,0,0,.35);
+      --fw-semibold:600;
+      --container: 960px;      /* max content width */
+      --gap: 16px;             /* base form gap */
+    }
+    @media (prefers-color-scheme: light){
+      :root{ --bg:#f8fafc; --card:#fff; --text:#111827; --muted:#475569;
+        --ring: color-mix(in hsl, var(--accent-2) 25%, transparent); }
+    }
+
+    /* ========== Global Reset ========= */
+    *,*::before,*::after{ box-sizing:border-box }
+    html,body{ height:100% }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      font-size:16px; line-height:1.55;                       /* iOS zoom-safe */
+      color:var(--text);
+      background: radial-gradient(1200px 800px at 70% -10%, #1f2937 0%, var(--bg) 50%, #0b1225 100%);
+      display:grid;
+      place-items:center;
+      padding: max(env(safe-area-inset-top), var(--space-5)) var(--space-5) max(env(safe-area-inset-bottom), var(--space-5));
+      min-height: 100vh;
+    }
+    @supports (height: 100dvh){
+      body{ min-height: 100dvh; }
+    }
+    @media (prefers-reduced-motion: reduce){
+      *,*::before,*::after{ animation:none !important; transition:none !important; scroll-behavior:auto !important; }
+    }
+
+    /* ========== Layout ========= */
+    .container{
+      width:100%;
+      max-width: var(--container);
+      padding: 0;              /* we'll pad card for mobile tightness */
+    }
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border: 1px solid rgba(148,163,184,.2);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: clamp(14px, 3vw, 24px);
+      backdrop-filter: blur(8px);
+    }
+
+    h2{ margin:0 0 var(--space-2); font-size: clamp(22px, 3.5vw, 32px); letter-spacing:-.02em }
+    .note{
+      font-size: 13px; color: var(--muted); line-height: 1.4;
+      background: rgba(148,163,184,.08); border: 1px dashed rgba(148,163,184,.25);
+      border-radius: 12px; padding: 10px 12px; margin-bottom: var(--space-3);
+    }
+
+    /* ========== Form ========= */
+    form{ display:grid; gap: var(--gap) }
+    fieldset{ border:0; padding:0; margin:0 }
+    legend{ font-weight: var(--fw-semibold); margin-bottom: var(--space-2) }
+    .row{ display:grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+    @media (max-width: 960px){ .row{ grid-template-columns: 1fr 1fr; } }   /* tablet 2-col */
+    @media (max-width: 720px){ .row{ grid-template-columns: 1fr; } }       /* phone 1-col */
+
+    .field{ position:relative }
+    label{ font-size:14px; color:var(--muted); display:block; margin-bottom:6px }
+
+    input, select, button, textarea { font: inherit }
+    input, select, textarea{
+      width:100%;
+      padding: 12px 14px;
+      background:#0b1020; color:var(--text);
+      border: 1px solid color-mix(in hsl, var(--muted) 30%, transparent);
+      border-radius: 12px; outline:none;
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+    @media (prefers-color-scheme: light){ input, select, textarea{ background:#fff; color: var(--text); } }
+    input:focus, select:focus, textarea:focus{ border-color: var(--accent); box-shadow: 0 0 0 4px var(--ring) }
+    input[aria-invalid="true"]{ border-color: var(--err); box-shadow: 0 0 0 4px color-mix(in hsl, var(--err) 25%, transparent) }
+
+    .hint{ font-size:12px; color:var(--muted); margin-top:6px }
+    .error{ font-size:12px; color:var(--err); margin-top:6px; min-height:1em }
+    .small-checkbox{ display:flex; align-items:center; gap:8px; margin-bottom:6px }
+
+    .divider{ height:1px; background: rgba(148,163,184,.2); margin: 6px 0 }
+
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; align-items:center }
+    button{
+      appearance:none; border:0;
+      background: linear-gradient(180deg, var(--accent), var(--accent-2));
+      color:#fff; padding: 12px 16px; font-weight: var(--fw-semibold);
+      border-radius:12px; cursor:pointer; box-shadow: 0 6px 16px rgba(37,99,235,.5);
+      touch-action: manipulation;
+    }
+    .ghost{ background:transparent; border:1px solid rgba(148,163,184,.35); color:var(--text); box-shadow:none }
+    .status{ font-size:13px }
+    .status.ok{ color:var(--ok) } .status.warn{ color:var(--warn) } .status.err{ color:var(--err) }
+
+    /* Eye buttons */
+    .icon-btn{
+      position:absolute; right:10px; top:36px;
+      background:transparent; border:0; padding:2px 4px; cursor:pointer; line-height:1;
+    }
+
+    /* Buttons full-width on narrow screens */
+    @media (max-width: 480px){
+      .actions button{ width:100% }
+    }
+
+    /* Dialog responsiveness */
+    dialog{
+      border: 0;
+      border-radius: 12px;
+      padding: clamp(12px, 3vw, 20px);
+      max-width: min(92vw, 420px);
+      box-shadow: var(--shadow);
+    }
+
+    .visually-hidden{ position:absolute!important; clip:rect(1px,1px,1px,1px); padding:0; border:0; height:1px; width:1px; overflow:hidden; white-space:nowrap }
+  </style>
+</head>
+<body>
+  <main class="container" role="main">
+    <section class="card" aria-labelledby="formTitle">
+      <h2 id="formTitle">Create Your Apple-style Account</h2>
+      <p class="note" id="demoNote">This is a demo — do not enter real personal data.</p>
+
+      <form id="signupForm" novalidate method="post" autocomplete="on" aria-describedby="demoNote">
+        <!-- Personal info -->
+        <fieldset aria-describedby="nameHelp">
+          <legend class="visually-hidden">Personal Information</legend>
+          <div id="nameHelp" class="visually-hidden">Enter your first and last name.</div>
+          <div class="row">
+            <div class="field">
+              <label for="firstName">First Name</label>
+              <input id="firstName" name="given-name" type="text" placeholder="e.g., Anik" autocomplete="given-name" required />
+              <div class="error" id="err-firstName" aria-live="polite"></div>
+            </div>
+            <div class="field">
+              <label for="lastName">Last Name</label>
+              <input id="lastName" name="family-name" type="text" placeholder="e.g., Rahman" autocomplete="family-name" required />
+              <div class="error" id="err-lastName" aria-live="polite"></div>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Region & DOB -->
+        <fieldset>
+          <legend class="visually-hidden">Region & Date of Birth</legend>
+          <div class="row">
+            <div class="field">
+              <label for="country">Country/Region</label>
+              <select id="country" name="country" autocomplete="country" required>
+                <option value="">— Select —</option>
+                <option value="BD">Bangladesh</option>
+                <option value="IN">India</option>
+                <option value="US">United States</option>
+                <option value="GB">United Kingdom</option>
+                <option value="CA">Canada</option>
+                <option value="AU">Australia</option>
+              </select>
+              <div class="error" id="err-country" aria-live="polite"></div>
+            </div>
+            <div class="field">
+              <label for="dob">Date of Birth</label>
+              <input id="dob" name="bday" type="date" required />
+              <p class="hint" id="ageHint">You must be at least 13 years old.</p>
+              <div class="error" id="err-dob" aria-live="polite"></div>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Contact -->
+        <fieldset>
+          <legend class="visually-hidden">Contact</legend>
+
+          <!-- Random email checkbox -->
+          <div class="small-checkbox" style="margin-bottom:6px">
+            <input id="useRandomEmail" type="checkbox" />
+            <label for="useRandomEmail" style="color:var(--muted)">Use random email (hide email field)</label>
+          </div>
+
+          <div class="row">
+            <div class="field" id="emailFieldWrapper">
+              <label for="email">Email (Your Apple ID)</label>
+              <input id="email" name="email" type="email" placeholder="name@example.com" autocomplete="email" inputmode="email" required />
+              <div class="error" id="err-email" aria-live="polite"></div>
+            </div>
+
+            <!-- Skip phone checkbox -->
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div class="small-checkbox">
+                <input id="skipPhone" type="checkbox" />
+                <label for="skipPhone" style="color:var(--muted)">Skip phone (auto-fill "SKIP")</label>
+              </div>
+              <div class="field">
+                <label for="phone">Mobile Number</label>
+                <input id="phone" name="tel" type="tel" inputmode="tel" placeholder="01XXXXXXXXX or +8801XXXXXXXXX"
+                       pattern="^(?:\\+?8801\\d{9}|01\\d{9})$" autocomplete="tel-national" aria-describedby="phoneHint" />
+                <p class="hint" id="phoneHint">Bangladeshi format: 01XXXXXXXXX (11 digits). International also allowed: +8801XXXXXXXXX.</p>
+                <div class="error" id="err-phone" aria-live="polite"></div>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Password -->
+        <fieldset>
+          <legend class="visually-hidden">Password</legend>
+          <div class="row">
+            <div class="field">
+              <label for="password">Password</label>
+              <input id="password" name="new-password" type="password" minlength="8" placeholder="At least 8 characters" required aria-describedby="pwdHint" autocomplete="new-password" />
+              <button type="button" class="icon-btn" id="togglePw" aria-label="Show/hide password">👁️</button>
+              <p id="pwdHint" class="hint">Minimum 8 characters, including uppercase, lowercase, number, and special character.</p>
+              <meter id="pwMeter" min="0" max="4" low="2" high="3" optimum="4" value="0" style="width:100%"></meter>
+              <div class="error" id="err-password" aria-live="polite"></div>
+            </div>
+            <div class="field">
+              <label for="confirm">Confirm Password</label>
+              <input id="confirm" name="confirm-password" type="password" required autocomplete="new-password" />
+              <button type="button" class="icon-btn" id="toggleCpw" aria-label="Show/hide confirm password">👁️</button>
+              <div class="error" id="err-confirm" aria-live="polite"></div>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Security -->
+        <fieldset>
+          <legend>Security Questions (Demo)</legend>
+          <div class="row">
+            <div class="field">
+              <label for="securityQuestion1">Security Question 1</label>
+              <select id="securityQuestion1" name="securityQuestion1" required>
+                <option value="">— Select —</option>
+                <option>What was the name of your best friend as a teenager?</option>
+                <option>What was the name of your first pet?</option>
+                <option>What was the first dish you learnt to cook?</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="securityAnswer1">Answer</label>
+              <input id="securityAnswer1" name="securityAnswer1" type="text" required autocomplete="off" />
+            </div>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="securityQuestion2">Security Question 2</label>
+              <select id="securityQuestion2" name="securityQuestion2" required>
+                <option value="">— Select —</option>
+                <option>What is your dream job?</option>
+                <option>What is your favourite children's book?</option>
+                <option>What was the model of your first motorised vehicle?</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="securityAnswer2">Answer</label>
+              <input id="securityAnswer2" name="securityAnswer2" type="text" required autocomplete="off" />
+            </div>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="securityQuestion3">Security Question 3</label>
+              <select id="securityQuestion3" name="securityQuestion3" required>
+                <option value="">— Select —</option>
+                <option>In what city did your parents meet?</option>
+                <option>What was the name of your first manager?</option>
+                <option>What is the name of the street where you grew up?</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="securityAnswer3">Answer</label>
+              <input id="securityAnswer3" name="securityAnswer3" type="text" required autocomplete="off" />
+            </div>
+          </div>
+          <p class="hint">Note: In real apps, prefer 2FA/Passkeys instead of security questions.</p>
+        </fieldset>
+
+        <div class="divider" role="separator" aria-hidden="true"></div>
+
+        <!-- WhatsApp (Bangla) -->
+        <fieldset>
+          <legend>WhatsApp যোগাযোগ (ঐচ্ছিক)</legend>
+          <div class="field">
+            <label for="whatsapp">WhatsApp নম্বর</label>
+            <input id="whatsapp" name="whatsapp" type="tel" inputmode="tel"
+                   placeholder="যেমন, +8801XXXXXXXXX বা 01XXXXXXXXX"
+                   pattern="^(?:\\+?8801\\d{9}|01\\d{9})$"
+                   autocomplete="tel" aria-describedby="whatsappHint" />
+            <p class="hint" id="whatsappHint">
+              গ্রাহক নিজে তার WhatsApp নম্বর লিখবে—আপনি পরে সেখানে যোগাযোগ করবেন।
+              নম্বর না দিলেও সাবমিট হবে; দিলে ফরম্যাট সঠিক হতে হবে (+8801… বা 01…).
+            </p>
+            <div class="error" id="err-whatsapp" aria-live="polite"></div>
+          </div>
+        </fieldset>
+
+        <!-- TRX (Bangla) -->
+        <fieldset>
+          <legend>পেমেন্ট নিশ্চিতকরণ (ঐচ্ছিক)</legend>
+          <div class="field">
+            <label for="trxId">TRX ID</label>
+            <input id="trxId" name="trxId" type="text" inputmode="text"
+                   placeholder="উদাহরণ: 8–20 অক্ষর/সংখ্যা"
+                   pattern="^[A-Za-z0-9]{8,20}$" aria-describedby="trxHint" />
+            <p class="hint" id="trxHint">
+              01630249778 এই নম্বরে 300 টাকা Send Money করে আপনার TRX ID দিন।
+              TRX ID দিলে 5 মিনিটের মধ্যে আপনার WhatsApp-এ যোগাযোগ করা হবে। Thank you.
+            </p>
+            <div class="error" id="err-trxId" aria-live="polite"></div>
+          </div>
+        </fieldset>
+
+        <div class="tos" style="display:grid;grid-template-columns:20px 1fr;gap:10px;align-items:start">
+          <input id="agree" type="checkbox" required />
+          <label for="agree">I agree to the Terms & Privacy Policy. This is a demo — do not provide real data.</label>
+        </div>
+
+        <div class="actions">
+          <button type="submit" aria-label="Create account">Create Account</button>
+          <button type="reset" class="ghost" id="resetBtn">Reset</button>
+          <span id="formStatus" class="status" role="status" aria-live="polite"></span>
+        </div>
+      </form>
+
+      <footer style="text-align:center;color:var(--muted);font-size:12px;margin-top:10px">
+        © Demo Form, for educational purposes.
+      </footer>
+
+      <noscript>
+        <p class="note">JavaScript is disabled — the form will submit with basic browser validation.</p>
+      </noscript>
+    </section>
+  </main>
+
+  <dialog id="successDialog" inert>
+    <p>✅ Demo only: Form validated! (No data is actually sent.)</p>
+    <form method="dialog"><button>OK</button></form>
+  </dialog>
+
+  <script>
+    /* ====== Helpers & Elements ====== */
+    const $ = (s, el=document) => el.querySelector(s);
+
+    const form = $('#signupForm');
+    const statusEl = $('#formStatus');
+    const dobInput = $('#dob');
+    const pw = $('#password');
+    const cpw = $('#confirm');
+    const phone = $('#phone');
+    const pwMeter = $('#pwMeter');
+    const dlg = $('#successDialog');
+    const whatsapp = $('#whatsapp');
+    const trxId = $('#trxId');
+
+    const useRandomEmail = $('#useRandomEmail');
+    const emailFieldWrapper = $('#emailFieldWrapper');
+    const emailInput = $('#email');
+    const skipPhone = $('#skipPhone');
+
+    function showStatus(msg, cls='ok'){ statusEl.textContent=msg; statusEl.className=`status ${cls}`; }
+    function setFieldValidity(input, valid, msg=''){
+      input.setAttribute('aria-invalid', String(!valid));
+      input.setCustomValidity(valid ? '' : msg);
+      const errEl = document.getElementById(`err-${input.id}`);
+      if (errEl) errEl.textContent = valid ? '' : msg;
+    }
+
+    /* ====== Password Utils ====== */
+    function passwordStrong(p){ return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^\\w\\s]).{8,}$/.test(p); }
+    function passwordScore(p){
+      let s=0; if(p.length>=8)s++; if(/[A-Z]/.test(p))s++; if(/[a-z]/.test(p))s++; if(/\\d/.test(p))s++; if(/[^\\w\\s]/.test(p))s++;
+      return Math.min(s,4);
+    }
+
+    /* ====== Age (13+) ====== */
+    function ageOK(dobStr){
+      const dob = new Date(dobStr); if(isNaN(dob)) return false;
+      const today = new Date();
+      let age = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+      return age >= 13;
+    }
+
+    /* Set DOB max = today - 13y */
+    (function setDobMax(){
+      const t = new Date(); t.setFullYear(t.getFullYear()-13);
+      const y=t.getFullYear(), m=String(t.getMonth()+1).padStart(2,'0'), d=String(t.getDate()).padStart(2,'0');
+      if (dobInput) dobInput.max = `${y}-${m}-${d}`;
+    })();
+
+    /* ====== Random Email ====== */
+    function genRandomEmail(){
+      const ts = Date.now().toString(36);
+      const rnd = Math.floor(Math.random()*9000)+1000;
+      return `user${ts}${rnd}@example.com`;
+    }
+    useRandomEmail.addEventListener('change', ()=>{
+      const on = useRandomEmail.checked;
+      if(on){
+        emailFieldWrapper.style.display = 'none';
+        emailInput.value = genRandomEmail();
+        emailInput.required = false;
+        setFieldValidity(emailInput, true, '');
+      }else{
+        emailFieldWrapper.style.display = '';
+        emailInput.value = '';
+        emailInput.required = true;
+        setFieldValidity(emailInput, true, '');
+      }
+    });
+
+    /* ====== Skip Phone ====== */
+    skipPhone.addEventListener('change', ()=>{
+      const on = skipPhone.checked;
+      if(on){
+        phone.value = 'SKIP';
+        phone.required = false;
+        setFieldValidity(phone, true, '');
+      }else{
+        phone.value = '';
+        phone.required = false; // optional
+        setFieldValidity(phone, true, '');
+      }
+    });
+
+    /* ====== Live Validations ====== */
+    pw?.addEventListener('input', ()=>{
+      if (pwMeter) pwMeter.value = passwordScore(pw.value);
+      const ok = passwordStrong(pw.value);
+      setFieldValidity(pw, !pw.value || ok, ok ? '' : 'Password does not meet the rules.');
+    });
+    cpw?.addEventListener('input', ()=>{
+      const match = pw.value === cpw.value;
+      setFieldValidity(cpw, !cpw.value || match, match ? '' : 'Passwords do not match.');
+    });
+    phone?.addEventListener('input', ()=>{
+      if (skipPhone.checked) { setFieldValidity(phone, true, ''); return; }
+      const pattern = new RegExp(phone.getAttribute('pattern'));
+      const ok = !phone.value || pattern.test(phone.value);
+      setFieldValidity(phone, ok, ok ? '' : 'Phone format is invalid.');
+    });
+    whatsapp?.addEventListener('input', ()=>{
+      const pattern = new RegExp(whatsapp.getAttribute('pattern'));
+      const ok = !whatsapp.value || pattern.test(whatsapp.value);
+      setFieldValidity(whatsapp, ok, ok ? '' : 'WhatsApp নম্বরের ফরম্যাট ঠিক নেই।');
+    });
+    trxId?.addEventListener('input', ()=>{
+      const pattern = new RegExp(trxId.getAttribute('pattern'));
+      const ok = !trxId.value || pattern.test(trxId.value);
+      setFieldValidity(trxId, ok, ok ? '' : 'TRX ID ফরম্যাট সঠিক নয় (8–20 অক্ষর/সংখ্যা)।');
+    });
+
+    /* ====== Eye Toggles ====== */
+    $('#togglePw')?.addEventListener('click', ()=>{ pw.type = pw.type === 'password' ? 'text' : 'password'; });
+    $('#toggleCpw')?.addEventListener('click', ()=>{ cpw.type = cpw.type === 'password' ? 'text' : 'password'; });
+
+    /* ====== Submit ====== */
+    form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+
+      if(!form.checkValidity()){
+        showStatus('⚠️ Please fill out required fields correctly.', 'warn');
+        form.reportValidity();
+        return;
+      }
+      if(!passwordStrong(pw.value)){
+        setFieldValidity(pw, false, 'Password does not meet the rules.');
+        showStatus('Password does not meet the rules.', 'err');
+        pw.focus(); return;
+      }
+      const match = pw.value === cpw.value;
+      setFieldValidity(cpw, match, match ? '' : 'Passwords do not match.');
+      if(!match){ showStatus('Passwords do not match.', 'err'); cpw.focus(); return; }
+
+      const ageOk = ageOK(dobInput.value);
+      setFieldValidity(dobInput, ageOk, ageOk ? '' : 'You must be at least 13 years old.');
+      if(!ageOk){ showStatus('You must be at least 13 years old.', 'err'); dobInput.focus(); return; }
+
+      if (phone && phone.value && !skipPhone.checked){
+        const ok = new RegExp(phone.getAttribute('pattern')).test(phone.value);
+        setFieldValidity(phone, ok, ok ? '' : 'Phone format is invalid.');
+        if (!ok){ showStatus('Phone format is invalid.', 'err'); phone.focus(); return; }
+      }
+      if (whatsapp && whatsapp.value.trim()){
+        const ok = new RegExp(whatsapp.getAttribute('pattern')).test(whatsapp.value.trim());
+        setFieldValidity(whatsapp, ok, ok ? '' : 'WhatsApp নম্বরের ফরম্যাট ঠিক নেই।');
+        if(!ok){ showStatus('WhatsApp নম্বরের ফরম্যাট ঠিক নেই।', 'err'); whatsapp.focus(); return; }
+      }
+      if (trxId && trxId.value.trim()){
+        const ok = new RegExp(trxId.getAttribute('pattern')).test(trxId.value.trim());
+        setFieldValidity(trxId, ok, ok ? '' : 'TRX ID ফরম্যাট সঠিক নয় (8–20 অক্ষর/সংখ্যা)।');
+        if(!ok){ showStatus('TRX ID ফরম্যাট সঠিক নয়।', 'err'); trxId.focus(); return; }
+      }
+
+      showStatus('✅ Demo: Form validated (no data sent).', 'ok');
+      if (typeof dlg.showModal === 'function'){ dlg.removeAttribute('inert'); dlg.showModal(); }
+    });
+
+    /* ====== Reset ====== */
+    $('#resetBtn')?.addEventListener('click', ()=>{
+      showStatus('');
+      if (useRandomEmail.checked){
+        useRandomEmail.checked = false;
+        emailFieldWrapper.style.display = '';
+        emailInput.value = '';
+        emailInput.required = true;
+      }
+      if (skipPhone.checked){
+        skipPhone.checked = false;
+        phone.value = '';
+      }
+      [pw, cpw, phone, dobInput, whatsapp, trxId].forEach(i=> i && setFieldValidity(i, true, ''));
+      if (pwMeter) pwMeter.value = 0;
+      if (dlg?.open) dlg.close();
+      dlg?.setAttribute('inert','');
+    });
+  </script>
+</body>
+</html>
 
