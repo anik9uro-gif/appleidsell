@@ -8,128 +8,99 @@
   <meta name="description" content="Modern, responsive & accessible Apple ID-style sign up (demo only)." />
   <link rel="icon" href="data:," />
   <style>
-    /* ========== Design Tokens ========= */
     :root{
       --bg:#0f172a; --card:#111827; --muted:#94a3b8; --text:#e5e7eb;
       --accent:#60a5fa; --accent-2:#2563eb; --ok:#22c55e; --warn:#f59e0b; --err:#ef4444;
       --ring: color-mix(in hsl, var(--accent) 35%, transparent);
-      --radius:16px;
-      --space-1:8px; --space-2:12px; --space-3:16px; --space-4:20px; --space-5:24px;
-      --shadow: 0 8px 30px rgba(0,0,0,.35);
-      --fw-semibold:600;
-      --container: 960px;      /* max content width */
-      --gap: 16px;             /* base form gap */
+      --radius:16px; --shadow:0 8px 30px rgba(0,0,0,.35);
+      --gap:16px; --pad: clamp(14px, 3vw, 24px);
+      --container:960px;
     }
     @media (prefers-color-scheme: light){
       :root{ --bg:#f8fafc; --card:#fff; --text:#111827; --muted:#475569;
-        --ring: color-mix(in hsl, var(--accent-2) 25%, transparent); }
+             --ring: color-mix(in hsl, var(--accent-2) 25%, transparent); }
     }
 
-    /* ========== Global Reset ========= */
     *,*::before,*::after{ box-sizing:border-box }
     html,body{ height:100% }
     body{
-      margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      font-size:16px; line-height:1.55;                       /* iOS zoom-safe */
+      margin:0; font: 400 16px/1.55 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       color:var(--text);
       background: radial-gradient(1200px 800px at 70% -10%, #1f2937 0%, var(--bg) 50%, #0b1225 100%);
-      display:grid;
-      place-items:center;
-      padding: max(env(safe-area-inset-top), var(--space-5)) var(--space-5) max(env(safe-area-inset-bottom), var(--space-5));
+      display:grid; place-items:center;
+      padding: max(env(safe-area-inset-top), 24px) 24px max(env(safe-area-inset-bottom), 24px);
       min-height: 100vh;
     }
-    @supports (height: 100dvh){
-      body{ min-height: 100dvh; }
-    }
+    @supports (height: 100dvh){ body{ min-height: 100dvh; } }
     @media (prefers-reduced-motion: reduce){
-      *,*::before,*::after{ animation:none !important; transition:none !important; scroll-behavior:auto !important; }
+      *,*::before,*::after{ animation:none!important; transition:none!important; scroll-behavior:auto!important; }
     }
 
-    /* ========== Layout ========= */
-    .container{
-      width:100%;
-      max-width: var(--container);
-      padding: 0;              /* we'll pad card for mobile tightness */
-    }
+    .container{ width:100%; max-width: var(--container); }
     .card{
       background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
       border: 1px solid rgba(148,163,184,.2);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      padding: clamp(14px, 3vw, 24px);
+      padding: var(--pad);
       backdrop-filter: blur(8px);
     }
-
-    h2{ margin:0 0 var(--space-2); font-size: clamp(22px, 3.5vw, 32px); letter-spacing:-.02em }
+    h2{ margin:0 0 10px; font-size: clamp(22px, 3.5vw, 32px); letter-spacing:-.02em }
     .note{
-      font-size: 13px; color: var(--muted); line-height: 1.4;
-      background: rgba(148,163,184,.08); border: 1px dashed rgba(148,163,184,.25);
-      border-radius: 12px; padding: 10px 12px; margin-bottom: var(--space-3);
+      font-size:13px; color:var(--muted);
+      background: rgba(148,163,184,.08); border:1px dashed rgba(148,163,184,.25);
+      border-radius:12px; padding:10px 12px; margin-bottom:12px;
     }
 
-    /* ========== Form ========= */
     form{ display:grid; gap: var(--gap) }
-    fieldset{ border:0; padding:0; margin:0 }
-    legend{ font-weight: var(--fw-semibold); margin-bottom: var(--space-2) }
-    .row{ display:grid; gap: 12px; grid-template-columns: 1fr 1fr; }
-    @media (max-width: 960px){ .row{ grid-template-columns: 1fr 1fr; } }   /* tablet 2-col */
-    @media (max-width: 720px){ .row{ grid-template-columns: 1fr; } }       /* phone 1-col */
+    fieldset{ border:0; margin:0; padding:0 }
+    legend{ font-weight:600; margin-bottom:8px }
+    .row{ display:grid; gap:12px; grid-template-columns: 1fr 1fr; }
+    @media (max-width: 720px){ .row{ grid-template-columns: 1fr; } }
 
     .field{ position:relative }
     label{ font-size:14px; color:var(--muted); display:block; margin-bottom:6px }
+    .small-checkbox{ display:flex; align-items:center; gap:8px; margin-bottom:6px }
 
-    input, select, button, textarea { font: inherit }
-    input, select, textarea{
-      width:100%;
-      padding: 12px 14px;
+    input,select,button,textarea{ font:inherit }
+    input,select,textarea{
+      width:100%; padding:12px 14px; border-radius:12px;
       background:#0b1020; color:var(--text);
-      border: 1px solid color-mix(in hsl, var(--muted) 30%, transparent);
-      border-radius: 12px; outline:none;
-      transition: border-color .15s ease, box-shadow .15s ease;
+      border:1px solid color-mix(in hsl, var(--muted) 30%, transparent);
+      outline:none; transition: border-color .15s ease, box-shadow .15s ease;
     }
-    @media (prefers-color-scheme: light){ input, select, textarea{ background:#fff; color: var(--text); } }
-    input:focus, select:focus, textarea:focus{ border-color: var(--accent); box-shadow: 0 0 0 4px var(--ring) }
-    input[aria-invalid="true"]{ border-color: var(--err); box-shadow: 0 0 0 4px color-mix(in hsl, var(--err) 25%, transparent) }
+    @media (prefers-color-scheme: light){ input,select,textarea{ background:#fff; color:var(--text); } }
+    input:focus,select:focus,textarea:focus{ border-color: var(--accent); box-shadow: 0 0 0 4px var(--ring) }
+    input[aria-invalid="true"]{ border-color: var(--err); box-shadow:0 0 0 4px color-mix(in hsl, var(--err) 25%, transparent) }
+
+    /* Locked/read-only visual state */
+    .locked{
+      background: linear-gradient(180deg, #0b1020, #0b0f1a);
+      opacity: .85;
+      cursor: not-allowed;
+    }
 
     .hint{ font-size:12px; color:var(--muted); margin-top:6px }
     .error{ font-size:12px; color:var(--err); margin-top:6px; min-height:1em }
-    .small-checkbox{ display:flex; align-items:center; gap:8px; margin-bottom:6px }
-
-    .divider{ height:1px; background: rgba(148,163,184,.2); margin: 6px 0 }
 
     .actions{ display:flex; gap:10px; flex-wrap:wrap; align-items:center }
     button{
-      appearance:none; border:0;
-      background: linear-gradient(180deg, var(--accent), var(--accent-2));
-      color:#fff; padding: 12px 16px; font-weight: var(--fw-semibold);
-      border-radius:12px; cursor:pointer; box-shadow: 0 6px 16px rgba(37,99,235,.5);
+      appearance:none; border:0; padding:12px 16px; border-radius:12px; font-weight:600; cursor:pointer;
+      background: linear-gradient(180deg, var(--accent), var(--accent-2)); color:#fff; box-shadow: 0 6px 16px rgba(37,99,235,.5);
       touch-action: manipulation;
     }
     .ghost{ background:transparent; border:1px solid rgba(148,163,184,.35); color:var(--text); box-shadow:none }
-    .status{ font-size:13px }
-    .status.ok{ color:var(--ok) } .status.warn{ color:var(--warn) } .status.err{ color:var(--err) }
+    .status{ font-size:13px } .status.ok{ color:var(--ok) } .status.warn{ color:var(--warn) } .status.err{ color:var(--err) }
 
-    /* Eye buttons */
-    .icon-btn{
-      position:absolute; right:10px; top:36px;
-      background:transparent; border:0; padding:2px 4px; cursor:pointer; line-height:1;
-    }
+    .icon-btn{ position:absolute; right:10px; top:36px; background:transparent; border:0; padding:2px 4px; cursor:pointer; line-height:1; }
 
-    /* Buttons full-width on narrow screens */
-    @media (max-width: 480px){
-      .actions button{ width:100% }
-    }
+    @media (max-width: 480px){ .actions button{ width:100% } }
 
-    /* Dialog responsiveness */
     dialog{
-      border: 0;
-      border-radius: 12px;
-      padding: clamp(12px, 3vw, 20px);
-      max-width: min(92vw, 420px);
-      box-shadow: var(--shadow);
+      border:0; border-radius:12px; padding: var(--pad);
+      max-width: min(92vw, 420px); box-shadow: var(--shadow);
     }
-
+    .divider{ height:1px; background: rgba(148,163,184,.2); margin: 6px 0 }
     .visually-hidden{ position:absolute!important; clip:rect(1px,1px,1px,1px); padding:0; border:0; height:1px; width:1px; overflow:hidden; white-space:nowrap }
   </style>
 </head>
@@ -187,33 +158,31 @@
         <!-- Contact -->
         <fieldset>
           <legend class="visually-hidden">Contact</legend>
-
-          <!-- Random email checkbox -->
-          <div class="small-checkbox" style="margin-bottom:6px">
-            <input id="useRandomEmail" type="checkbox" />
-            <label for="useRandomEmail" style="color:var(--muted)">Use random email (hide email field)</label>
-          </div>
-
           <div class="row">
-            <div class="field" id="emailFieldWrapper">
+            <!-- Email block -->
+            <div class="field" id="emailBlock">
+              <div class="small-checkbox">
+                <input id="useRandomEmail" type="checkbox" />
+                <label for="useRandomEmail" style="color:var(--muted)">Use random email (keep field visible)</label>
+              </div>
               <label for="email">Email (Your Apple ID)</label>
               <input id="email" name="email" type="email" placeholder="name@example.com" autocomplete="email" inputmode="email" required />
               <div class="error" id="err-email" aria-live="polite"></div>
             </div>
 
-            <!-- Skip phone checkbox -->
-            <div style="display:flex;flex-direction:column;gap:6px">
+            <!-- Phone block -->
+            <div class="field" id="phoneBlock">
               <div class="small-checkbox">
                 <input id="skipPhone" type="checkbox" />
-                <label for="skipPhone" style="color:var(--muted)">Skip phone (auto-fill "SKIP")</label>
+                <label for="skipPhone" style="color:var(--muted)">Skip number (keep field visible)</label>
               </div>
-              <div class="field">
-                <label for="phone">Mobile Number</label>
-                <input id="phone" name="tel" type="tel" inputmode="tel" placeholder="01XXXXXXXXX or +8801XXXXXXXXX"
-                       pattern="^(?:\\+?8801\\d{9}|01\\d{9})$" autocomplete="tel-national" aria-describedby="phoneHint" />
-                <p class="hint" id="phoneHint">Bangladeshi format: 01XXXXXXXXX (11 digits). International also allowed: +8801XXXXXXXXX.</p>
-                <div class="error" id="err-phone" aria-live="polite"></div>
-              </div>
+              <label for="phone">Mobile Number</label>
+              <input id="phone" name="tel" type="tel" inputmode="tel"
+                     placeholder="01XXXXXXXXX or +8801XXXXXXXXX"
+                     pattern="^(?:\\+?8801\\d{9}|01\\d{9})$"
+                     autocomplete="tel-national" aria-describedby="phoneHint" />
+              <p class="hint" id="phoneHint">Bangladeshi format: 01XXXXXXXXX (11 digits). International also allowed: +8801XXXXXXXXX.</p>
+              <div class="error" id="err-phone" aria-live="polite"></div>
             </div>
           </div>
         </fieldset>
@@ -239,7 +208,7 @@
           </div>
         </fieldset>
 
-        <!-- Security -->
+        <!-- Security (demo) -->
         <fieldset>
           <legend>Security Questions (Demo)</legend>
           <div class="row">
@@ -353,9 +322,10 @@
   </dialog>
 
   <script>
-    /* ====== Helpers & Elements ====== */
+    // Helper
     const $ = (s, el=document) => el.querySelector(s);
 
+    // Elements
     const form = $('#signupForm');
     const statusEl = $('#formStatus');
     const dobInput = $('#dob');
@@ -368,11 +338,11 @@
     const trxId = $('#trxId');
 
     const useRandomEmail = $('#useRandomEmail');
-    const emailFieldWrapper = $('#emailFieldWrapper');
     const emailInput = $('#email');
+
     const skipPhone = $('#skipPhone');
 
-    function showStatus(msg, cls='ok'){ statusEl.textContent=msg; statusEl.className=`status ${cls}`; }
+    function showStatus(msg, cls='ok'){ statusEl.textContent = msg; statusEl.className = `status ${cls}`; }
     function setFieldValidity(input, valid, msg=''){
       input.setAttribute('aria-invalid', String(!valid));
       input.setCustomValidity(valid ? '' : msg);
@@ -380,68 +350,78 @@
       if (errEl) errEl.textContent = valid ? '' : msg;
     }
 
-    /* ====== Password Utils ====== */
     function passwordStrong(p){ return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^\\w\\s]).{8,}$/.test(p); }
     function passwordScore(p){
       let s=0; if(p.length>=8)s++; if(/[A-Z]/.test(p))s++; if(/[a-z]/.test(p))s++; if(/\\d/.test(p))s++; if(/[^\\w\\s]/.test(p))s++;
       return Math.min(s,4);
     }
-
-    /* ====== Age (13+) ====== */
     function ageOK(dobStr){
       const dob = new Date(dobStr); if(isNaN(dob)) return false;
-      const today = new Date();
-      let age = today.getFullYear() - dob.getFullYear();
-      const m = today.getMonth() - dob.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+      const t = new Date();
+      let age = t.getFullYear() - dob.getFullYear();
+      const m = t.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && t.getDate() < dob.getDate())) age--;
       return age >= 13;
     }
 
-    /* Set DOB max = today - 13y */
+    // DOB max = today - 13y
     (function setDobMax(){
       const t = new Date(); t.setFullYear(t.getFullYear()-13);
       const y=t.getFullYear(), m=String(t.getMonth()+1).padStart(2,'0'), d=String(t.getDate()).padStart(2,'0');
       if (dobInput) dobInput.max = `${y}-${m}-${d}`;
     })();
 
-    /* ====== Random Email ====== */
+    // Random email generator
     function genRandomEmail(){
       const ts = Date.now().toString(36);
       const rnd = Math.floor(Math.random()*9000)+1000;
       return `user${ts}${rnd}@example.com`;
     }
+
+    // EMAIL: keep visible, lock/unlock + show "watermark" (value)
     useRandomEmail.addEventListener('change', ()=>{
       const on = useRandomEmail.checked;
-      if(on){
-        emailFieldWrapper.style.display = 'none';
-        emailInput.value = genRandomEmail();
-        emailInput.required = false;
-        setFieldValidity(emailInput, true, '');
-      }else{
-        emailFieldWrapper.style.display = '';
+      if (on){
+        const randomEmail = genRandomEmail();
+        emailInput.value = randomEmail;
+        emailInput.readOnly = true;
+        emailInput.classList.add('locked');
+        emailInput.setAttribute('aria-readonly', 'true');
+        emailInput.required = true; // still required, and already valid
+      } else {
+        emailInput.readOnly = false;
+        emailInput.classList.remove('locked');
+        emailInput.removeAttribute('aria-readonly');
         emailInput.value = '';
         emailInput.required = true;
-        setFieldValidity(emailInput, true, '');
       }
+      setFieldValidity(emailInput, true, '');
     });
 
-    /* ====== Skip Phone ====== */
+    // PHONE: keep visible, lock/unlock + set "SKIP number"
     skipPhone.addEventListener('change', ()=>{
       const on = skipPhone.checked;
-      if(on){
-        phone.value = 'SKIP';
-        phone.required = false;
-        setFieldValidity(phone, true, '');
-      }else{
+      if (on){
+        phone.value = 'SKIP number';
+        phone.readOnly = true;
+        phone.classList.add('locked');
+        phone.setAttribute('aria-readonly', 'true');
+        phone.required = false; // optional anyway
+        setFieldValidity(phone, true, ''); // bypass pattern while locked
+      } else {
+        phone.readOnly = false;
+        phone.classList.remove('locked');
+        phone.removeAttribute('aria-readonly');
         phone.value = '';
-        phone.required = false; // optional
+        phone.required = false;
         setFieldValidity(phone, true, '');
       }
     });
 
-    /* ====== Live Validations ====== */
+    // Live validation
+    const pwMeterEl = pwMeter;
     pw?.addEventListener('input', ()=>{
-      if (pwMeter) pwMeter.value = passwordScore(pw.value);
+      if (pwMeterEl) pwMeterEl.value = passwordScore(pw.value);
       const ok = passwordStrong(pw.value);
       setFieldValidity(pw, !pw.value || ok, ok ? '' : 'Password does not meet the rules.');
     });
@@ -450,7 +430,7 @@
       setFieldValidity(cpw, !cpw.value || match, match ? '' : 'Passwords do not match.');
     });
     phone?.addEventListener('input', ()=>{
-      if (skipPhone.checked) { setFieldValidity(phone, true, ''); return; }
+      if (skipPhone.checked || phone.readOnly) { setFieldValidity(phone, true, ''); return; }
       const pattern = new RegExp(phone.getAttribute('pattern'));
       const ok = !phone.value || pattern.test(phone.value);
       setFieldValidity(phone, ok, ok ? '' : 'Phone format is invalid.');
@@ -466,66 +446,78 @@
       setFieldValidity(trxId, ok, ok ? '' : 'TRX ID ফরম্যাট সঠিক নয় (8–20 অক্ষর/সংখ্যা)।');
     });
 
-    /* ====== Eye Toggles ====== */
-    $('#togglePw')?.addEventListener('click', ()=>{ pw.type = pw.type === 'password' ? 'text' : 'password'; });
-    $('#toggleCpw')?.addEventListener('click', ()=>{ cpw.type = cpw.type === 'password' ? 'text' : 'password'; });
+    // Eye toggles
+    document.getElementById('togglePw')?.addEventListener('click', ()=>{ pw.type = pw.type === 'password' ? 'text' : 'password'; });
+    document.getElementById('toggleCpw')?.addEventListener('click', ()=>{ cpw.type = cpw.type === 'password' ? 'text' : 'password'; });
 
-    /* ====== Submit ====== */
+    // Submit
     form.addEventListener('submit', (e)=>{
       e.preventDefault();
 
-      if(!form.checkValidity()){
+      if (!form.checkValidity()){
         showStatus('⚠️ Please fill out required fields correctly.', 'warn');
         form.reportValidity();
         return;
       }
-      if(!passwordStrong(pw.value)){
+      if (!passwordStrong(pw.value)){
         setFieldValidity(pw, false, 'Password does not meet the rules.');
         showStatus('Password does not meet the rules.', 'err');
         pw.focus(); return;
       }
       const match = pw.value === cpw.value;
       setFieldValidity(cpw, match, match ? '' : 'Passwords do not match.');
-      if(!match){ showStatus('Passwords do not match.', 'err'); cpw.focus(); return; }
+      if (!match){ showStatus('Passwords do not match.', 'err'); cpw.focus(); return; }
 
       const ageOk = ageOK(dobInput.value);
       setFieldValidity(dobInput, ageOk, ageOk ? '' : 'You must be at least 13 years old.');
-      if(!ageOk){ showStatus('You must be at least 13 years old.', 'err'); dobInput.focus(); return; }
+      if (!ageOk){ showStatus('You must be at least 13 years old.', 'err'); dobInput.focus(); return; }
 
-      if (phone && phone.value && !skipPhone.checked){
+      // Phone: if it's locked/skipped, bypass; otherwise validate if provided
+      if (phone && phone.value && !phone.readOnly){
         const ok = new RegExp(phone.getAttribute('pattern')).test(phone.value);
         setFieldValidity(phone, ok, ok ? '' : 'Phone format is invalid.');
         if (!ok){ showStatus('Phone format is invalid.', 'err'); phone.focus(); return; }
       }
+
+      // WhatsApp (if provided)
       if (whatsapp && whatsapp.value.trim()){
         const ok = new RegExp(whatsapp.getAttribute('pattern')).test(whatsapp.value.trim());
         setFieldValidity(whatsapp, ok, ok ? '' : 'WhatsApp নম্বরের ফরম্যাট ঠিক নেই।');
-        if(!ok){ showStatus('WhatsApp নম্বরের ফরম্যাট ঠিক নেই।', 'err'); whatsapp.focus(); return; }
+        if (!ok){ showStatus('WhatsApp নম্বরের ফরম্যাট ঠিক নেই।', 'err'); whatsapp.focus(); return; }
       }
+      // TRX (if provided)
       if (trxId && trxId.value.trim()){
         const ok = new RegExp(trxId.getAttribute('pattern')).test(trxId.value.trim());
         setFieldValidity(trxId, ok, ok ? '' : 'TRX ID ফরম্যাট সঠিক নয় (8–20 অক্ষর/সংখ্যা)।');
-        if(!ok){ showStatus('TRX ID ফরম্যাট সঠিক নয়।', 'err'); trxId.focus(); return; }
+        if (!ok){ showStatus('TRX ID ফরম্যাট সঠিক নয়।', 'err'); trxId.focus(); return; }
       }
 
       showStatus('✅ Demo: Form validated (no data sent).', 'ok');
-      if (typeof dlg.showModal === 'function'){ dlg.removeAttribute('inert'); dlg.showModal(); }
+      if (typeof dlg?.showModal === 'function'){ dlg.removeAttribute('inert'); dlg.showModal(); }
     });
 
-    /* ====== Reset ====== */
-    $('#resetBtn')?.addEventListener('click', ()=>{
+    // Reset
+    document.getElementById('resetBtn')?.addEventListener('click', ()=>{
       showStatus('');
+      // unlock & clear email
       if (useRandomEmail.checked){
         useRandomEmail.checked = false;
-        emailFieldWrapper.style.display = '';
+        emailInput.readOnly = false;
+        emailInput.classList.remove('locked');
+        emailInput.removeAttribute('aria-readonly');
         emailInput.value = '';
         emailInput.required = true;
       }
+      // unlock & clear phone
       if (skipPhone.checked){
         skipPhone.checked = false;
+        phone.readOnly = false;
+        phone.classList.remove('locked');
+        phone.removeAttribute('aria-readonly');
         phone.value = '';
+        phone.required = false;
       }
-      [pw, cpw, phone, dobInput, whatsapp, trxId].forEach(i=> i && setFieldValidity(i, true, ''));
+      [pw, cpw, phone, dobInput, whatsapp, trxId, emailInput].forEach(i=> i && setFieldValidity(i, true, ''));
       if (pwMeter) pwMeter.value = 0;
       if (dlg?.open) dlg.close();
       dlg?.setAttribute('inert','');
@@ -533,4 +525,3 @@
   </script>
 </body>
 </html>
-
