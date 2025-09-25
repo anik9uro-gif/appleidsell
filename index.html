@@ -1,543 +1,531 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+
+<html lang="bn" class="dark">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Apple ID-style Sign Up — Accessible Demo (Responsive)</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ঢাকার স্বর্ণের বাজারের মূল্য তালিকা</title>
   <meta name="color-scheme" content="dark light" />
-  <meta name="description" content="Modern, responsive & accessible Apple ID-style sign up (demo only)." />
-  <link rel="icon" href="data:," />
+  <meta name="theme-color" content="#0B0B0F" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter','ui-sans-serif','system-ui'] },
+          colors: { base: {50:'#f6f7f9',100:'#ECEEF2',900:'#0B0B0F'} },
+          boxShadow: { soft:'0 6px 30px rgba(0,0,0,.12)', ring:'inset 0 0 0 1px rgba(255,255,255,.06)'}
+        }
+      }
+    }
+  </script>
   <style>
-    :root{
-      --bg:#0f172a; --card:#111827; --muted:#94a3b8; --text:#e5e7eb;
-      --accent:#60a5fa; --accent-2:#2563eb; --ok:#22c55e; --warn:#f59e0b; --err:#ef4444;
-      --ring: color-mix(in hsl, var(--accent) 35%, transparent);
-      --radius:16px; --shadow:0 8px 30px rgba(0,0,0,.35);
-      --gap:16px; --pad: clamp(14px, 3vw, 24px);
-      --container:960px;
-    }
-    @media (prefers-color-scheme: light){
-      :root{ --bg:#f8fafc; --card:#fff; --text:#111827; --muted:#475569;
-             --ring: color-mix(in hsl, var(--accent-2) 25%, transparent); }
-    }
+    html { scroll-behavior: smooth; }
 
-    *,*::before,*::after{ box-sizing:border-box }
-    html,body{ height:100% }
-    body{
-      margin:0; font: 400 16px/1.55 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      color:var(--text);
-      background: radial-gradient(1200px 800px at 70% -10%, #1f2937 0%, var(--bg) 50%, #0b1225 100%);
-      display:grid; place-items:center;
-      padding: max(env(safe-area-inset-top), 24px) 24px max(env(safe-area-inset-bottom), 24px);
-      min-height: 100vh;
-    }
-    @supports (height: 100dvh){ body{ min-height: 100dvh; } }
-    @media (prefers-reduced-motion: reduce){
-      *,*::before,*::after{ animation:none!important; transition:none!important; scroll-behavior:auto!important; }
-    }
+```
+/* Background */
+.bgfx{position:fixed; inset:0; z-index:-1;}
+.bgfx::before{
+  content:""; position:absolute; inset:0;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(251,191,36,.12), transparent),
+    radial-gradient(900px 500px at 100% 10%, rgba(168,85,247,.10), transparent);
+}
 
-    .container{ width:100%; max-width: var(--container); }
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      border: 1px solid rgba(148,163,184,.2);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: var(--pad);
-      backdrop-filter: blur(8px);
-    }
-    h2{ margin:0 0 10px; font-size: clamp(22px, 3.5vw, 32px); letter-spacing:-.02em }
-    .note{
-      font-size:13px; color:var(--muted);
-      background: rgba(148,163,184,.08); border:1px dashed rgba(148,163,184,.25);
-      border-radius:12px; padding:10px 12px; margin-bottom:12px;
-    }
+/* Topbar (modern) */
+.topbar{ transition: background-color .2s, box-shadow .2s, border-color .2s; }
+.topbar.scrolled{ background: rgba(11,11,15,.82); box-shadow: 0 8px 24px rgba(0,0,0,.22); border-color: rgba(255,255,255,.12); }
 
-    form{ display:grid; gap: var(--gap) }
-    fieldset{ border:0; margin:0; padding:0 }
-    legend{ font-weight:600; margin-bottom:8px }
-    .row{ display:grid; gap:12px; grid-template-columns: 1fr 1fr; }
-    @media (max-width: 720px){ .row{ grid-template-columns: 1fr; } }
+.brand{ display:inline-flex; align-items:center; gap:.55rem; }
+.logo{
+  position:relative; width:28px; height:28px; border-radius:999px;
+  background: radial-gradient(circle at 30% 30%, #fbbf24, transparent 60%),
+              radial-gradient(circle at 70% 70%, #a855f7, transparent 60%), #0b0b0f;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.2), 0 0 18px rgba(251,191,36,.18);
+}
+.logo::after{ content:""; position:absolute; inset:0; border-radius:inherit; border:1px solid rgba(255,255,255,.12); }
 
-    .field{ position:relative }
-    label{ font-size:14px; color:var(--muted); display:block; margin-bottom:6px }
-    .small-checkbox{ display:flex; align-items:center; gap:8px; margin-bottom:6px }
+.nav-link{ position:relative; padding:.55rem .95rem; border-radius:999px; font-weight:600; font-size:13px; opacity:.95; display:inline-flex; align-items:center; gap:.45rem; }
+.nav-link:hover{ background: rgba(255,255,255,.08); }
+.nav-link.active{ background:linear-gradient(180deg, rgba(251,191,36,.25), rgba(168,85,247,.18)); color:#fff; }
+.nav-icon{ width:16px; height:16px; opacity:.9 }
 
-    input,select,button,textarea{ font:inherit }
-    input,select,textarea{
-      width:100%; padding:12px 14px; border-radius:12px;
-      background:#0b1020; color:var(--text);
-      border:1px solid color-mix(in hsl, var(--muted) 30%, transparent);
-      outline:none; transition: border-color .15s ease, box-shadow .15s ease;
-    }
-    @media (prefers-color-scheme: light){ input,select,textarea{ background:#fff; color:var(--text); } }
-    input:focus,select:focus,textarea:focus{ border-color: var(--accent); box-shadow: 0 0 0 4px var(--ring) }
-    input[aria-invalid="true"]{ border-color: var(--err); box-shadow:0 0 0 4px color-mix(in hsl, var(--err) 25%, transparent) }
+.nav-rail{ position:relative; }
+.nav-underline{ position:absolute; left:0; bottom:-6px; height:2px; width:0; background:linear-gradient(90deg,#fbbf24,#a855f7); border-radius:2px; transition:.25s; opacity:.85 }
 
-    .locked{ background: linear-gradient(180deg, #0b1020, #0b0f1a); opacity: .85; cursor: not-allowed; }
+/* Drawer */
+#mobilePanel{ transform: translateX(-100%); transition: transform .28s ease; }
+#mobileMenu.open #mobilePanel{ transform: translateX(0); }
 
-    .hint{ font-size:12px; color:var(--muted); margin-top:6px }
-    .error{ font-size:12px; color:var(--err); margin-top:6px; min-height:1em }
+/* Cards / tables */
+.glass{ backdrop-filter:saturate(140%) blur(14px) }
+.table-wrap{ position:relative; overflow:auto; border-radius:14px; border:1px solid rgba(255,255,255,.1); }
+.table-wrap::after{ content:""; position:absolute; right:0; top:0; bottom:0; width:28px; pointer-events:none; background:linear-gradient(to right, rgba(0,0,0,0), rgba(0,0,0,.22)); }
+@media (min-width: 640px){ .table-wrap::after{ display:none } }
 
-    .actions{ display:flex; gap:10px; flex-wrap:wrap; align-items:center }
-    button{
-      appearance:none; border:0; padding:12px 16px; border-radius:12px; font-weight:600; cursor:pointer;
-      background: linear-gradient(180deg, var(--accent), var(--accent-2)); color:#fff; box-shadow: 0 6px 16px rgba(37,99,235,.5);
-      touch-action: manipulation;
-    }
-    .ghost{ background:transparent; border:1px solid rgba(148,163,184,.35); color:var(--text); box-shadow:none }
-    .status{ font-size:13px } .status.ok{ color:var(--ok) } .status.warn{ color:var(--warn) } .status.err{ color:var(--err) }
+.flash{ animation:flashBg .9s ease-out }
+@keyframes flashBg{ 0%{ background:linear-gradient(90deg,rgba(251,191,36,.22),transparent)} 100%{ background:transparent } }
 
-    .icon-btn{ position:absolute; right:10px; top:36px; background:transparent; border:0; padding:2px 4px; cursor:pointer; line-height:1; }
+/* Mobile: table -> cards */
+@media (max-width:640px){
+  table.rtable{ width:100%; border-collapse:separate; border-spacing:0; }
+  table.rtable thead{ display:none; }
+  table.rtable tbody{ display:block; }
+  table.rtable tr{ display:grid; grid-template-columns:1fr; gap:.35rem; margin:10px 0; padding:.6rem .7rem; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:14px; box-shadow:0 6px 20px rgba(0,0,0,.14); }
+  table.rtable td{ display:flex; justify-content:space-between; align-items:center; padding:.45rem .25rem; }
+  table.rtable td::before{ content: attr(data-label); font-weight:600; color:#a3a3a3; margin-right:.75rem; }
+  table.rtable td.price{ justify-content:flex-end; font-weight:800; font-size:clamp(16px,5.2vw,22px); color:#facc15; letter-spacing:.2px; }
+  table.rtable td[data-label="মূল্য (BDT)"]{ border-top:1px dashed rgba(255,255,255,.16); padding-top:.6rem; }
+}
 
-    @media (max-width: 480px){ .actions button{ width:100% } }
+/* Ads */
+.ad-banner{ display:flex; align-items:center; justify-content:center; border-radius:16px; background:rgba(255,255,255,.06); border:1px dashed rgba(255,255,255,.16); color:#bbb; text-align:center; margin:12px 0; overflow:hidden; min-height:90px; position:relative }
+.ad-label{ position:absolute; top:6px; right:10px; font-size:10px; letter-spacing:.08em; opacity:.7 }
+@media(max-width:640px){ .ad-banner{ min-height:100px } }
 
-    dialog{ border:0; border-radius:12px; padding: var(--pad); max-width: min(92vw, 420px); box-shadow: var(--shadow); }
-    .divider{ height:1px; background: rgba(148,163,184,.2); margin: 6px 0 }
-    .visually-hidden{ position:absolute!important; clip:rect(1px,1px,1px,1px); padding:0; border:0; height:1px; width:1px; overflow:hidden; white-space:nowrap }
+/* Tabs (mobile quick nav bottom) */
+.tabs{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; background:rgba(255,255,255,.05); padding:6px; border-radius:999px; border:1px solid rgba(255,255,255,.12); }
+.tab{ padding:.5rem .8rem; border-radius:999px; text-align:center; font-weight:600; font-size:13px; opacity:.9; }
+.tab.active{ background:linear-gradient(180deg, rgba(251,191,36,.25), rgba(168,85,247,.18)); color:white; }
+@media(min-width:1024px){ .tabs, .bottom-tabs{ display:none } }
+```
+
   </style>
 </head>
-<body>
-  <main class="container" role="main">
-    <section class="card" aria-labelledby="formTitle">
-      <h2 id="formTitle">Create Your Apple-style Account</h2>
-      <p class="note" id="demoNote">This is a demo — do not enter real personal data.</p>
+<body class="bg-base-900 text-gray-100 antialiased selection:bg-amber-400/40" data-view="today">
+  <div class="bgfx"></div>
 
-      <!-- ✅ Formspree integration -->
-      <form id="signupForm" novalidate method="POST" action="https://formspree.io/f/xyzdyrwj" autocomplete="on" aria-describedby="demoNote">
-        <!-- Personal info -->
-        <fieldset aria-describedby="nameHelp">
-          <legend class="visually-hidden">Personal Information</legend>
-          <div id="nameHelp" class="visually-hidden">Enter your first and last name.</div>
-          <div class="row">
-            <div class="field">
-              <label for="firstName">First Name</label>
-              <input id="firstName" name="given-name" type="text" placeholder="e.g., Anik" autocomplete="given-name" required />
-              <div class="error" id="err-firstName" aria-live="polite"></div>
-            </div>
-            <div class="field">
-              <label for="lastName">Last Name</label>
-              <input id="lastName" name="family-name" type="text" placeholder="e.g., Rahman" autocomplete="family-name" required />
-              <div class="error" id="err-lastName" aria-live="polite"></div>
-            </div>
-          </div>
-        </fieldset>
+  <!-- Topbar -->
 
-        <!-- Region & DOB -->
-        <fieldset>
-          <legend class="visually-hidden">Region & Date of Birth</legend>
-          <div class="row">
-            <div class="field">
-              <label for="country">Country/Region</label>
-              <select id="country" name="country" autocomplete="country" required>
-                <option value="">— Select —</option>
-                <option value="BD">Bangladesh</option>
-                <option value="IN">India</option>
-                <option value="US">United States</option>
-                <option value="GB">United Kingdom</option>
-                <option value="CA">Canada</option>
-                <option value="AU">Australia</option>
-              </select>
-              <div class="error" id="err-country" aria-live="polite"></div>
-            </div>
-            <div class="field">
-              <label for="dob">Date of Birth</label>
-              <input id="dob" name="bday" type="date" required />
-              <p class="hint" id="ageHint">You must be at least 13 years old.</p>
-              <div class="error" id="err-dob" aria-live="polite"></div>
-            </div>
-          </div>
-        </fieldset>
-
-        <!-- Contact -->
-        <fieldset>
-          <legend class="visually-hidden">Contact</legend>
-          <div class="row">
-            <!-- Email block -->
-            <div class="field" id="emailBlock">
-              <div class="small-checkbox">
-                <input id="useRandomEmail" type="checkbox" />
-                <label for="useRandomEmail" style="color:var(--muted)">Use random email (keep field visible)</label>
-              </div>
-              <label for="email">Email (Your Apple ID)</label>
-              <input id="email" name="email" type="email" placeholder="name@example.com" autocomplete="email" inputmode="email" required />
-              <div class="error" id="err-email" aria-live="polite"></div>
-            </div>
-
-            <!-- Phone block -->
-            <div class="field" id="phoneBlock">
-              <div class="small-checkbox">
-                <input id="skipPhone" type="checkbox" />
-                <label for="skipPhone" style="color:var(--muted)">Skip number (keep field visible)</label>
-              </div>
-              <label for="phone">Mobile Number</label>
-              <input id="phone" name="tel" type="tel" inputmode="tel"
-                     placeholder="01XXXXXXXXX or +8801XXXXXXXXX"
-                     pattern="^(?:\+?8801\d{9}|01\d{9})$"
-                     autocomplete="tel-national" aria-describedby="phoneHint" />
-              <p class="hint" id="phoneHint">Bangladeshi format: 01XXXXXXXXX (11 digits). International also allowed: +8801XXXXXXXXX.</p>
-              <div class="error" id="err-phone" aria-live="polite"></div>
-            </div>
-          </div>
-        </fieldset>
-
-        <!-- Password -->
-        <fieldset>
-          <legend class="visually-hidden">Password</legend>
-          <div class="row">
-            <div class="field">
-              <label for="password">Password</label>
-              <input id="password" name="new-password" type="password" minlength="8" placeholder="At least 8 characters" required aria-describedby="pwdHint" autocomplete="new-password" />
-              <button type="button" class="icon-btn" id="togglePw" aria-label="Show/hide password">👁️</button>
-              <p id="pwdHint" class="hint">Minimum 8 characters, including uppercase, lowercase, number, and special character.</p>
-              <meter id="pwMeter" min="0" max="4" low="2" high="3" optimum="4" value="0" style="width:100%"></meter>
-              <div class="error" id="err-password" aria-live="polite"></div>
-            </div>
-            <div class="field">
-              <label for="confirm">Confirm Password</label>
-              <input id="confirm" name="confirm-password" type="password" required autocomplete="new-password" />
-              <button type="button" class="icon-btn" id="toggleCpw" aria-label="Show/hide confirm password">👁️</button>
-              <div class="error" id="err-confirm" aria-live="polite"></div>
-            </div>
-          </div>
-        </fieldset>
-
-        <fieldset>
-          <legend>Security Questions (Demo)</legend>
-          <div class="row">
-            <div class="field">
-              <label for="securityQuestion1">Security Question 1</label>
-              <select id="securityQuestion1" name="securityQuestion1" required>
-                <option value="">— Select —</option>
-                <option>What was the name of your best friend as a teenager?</option>
-                <option>What was the name of your first pet?</option>
-                <option>What was the first dish you learnt to cook?</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="securityAnswer1">Answer</label>
-              <input id="securityAnswer1" name="securityAnswer1" type="text" required autocomplete="off" />
-            </div>
-          </div>
-          <div class="row">
-            <div class="field">
-              <label for="securityQuestion2">Security Question 2</label>
-              <select id="securityQuestion2" name="securityQuestion2" required>
-                <option value="">— Select —</option>
-                <option>What is your dream job?</option>
-                <option>What is your favourite children's book?</option>
-                <option>What was the model of your first motorised vehicle?</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="securityAnswer2">Answer</label>
-              <input id="securityAnswer2" name="securityAnswer2" type="text" required autocomplete="off" />
-            </div>
-          </div>
-          <div class="row">
-            <div class="field">
-              <label for="securityQuestion3">Security Question 3</label>
-              <select id="securityQuestion3" name="securityQuestion3" required>
-                <option value="">— Select —</option>
-                <option>In what city did your parents meet?</option>
-                <option>What was the name of your first manager?</option>
-                <option>What is the name of the street where you grew up?</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="securityAnswer3">Answer</label>
-              <input id="securityAnswer3" name="securityAnswer3" type="text" required autocomplete="off" />
-            </div>
-          </div>
-          <p class="hint">Note: In real apps, prefer 2FA/Passkeys instead of security questions.</p>
-        </fieldset>
-
-        <div class="divider" role="separator" aria-hidden="true"></div>
-
-        <!-- WhatsApp (Bangla) -->
-        <fieldset>
-          <legend>WhatsApp যোগাযোগ (ঐচ্ছিক)</legend>
-          <div class="field">
-            <label for="whatsapp">WhatsApp নম্বর</label>
-            <input id="whatsapp" name="whatsapp" type="tel" inputmode="tel"
-                   placeholder="যেমন, +8801XXXXXXXXX বা 01XXXXXXXXX"
-                   pattern="^(?:\+?8801\d{9}|01\d{9})$"
-                   autocomplete="tel" aria-describedby="whatsappHint" />
-            <p class="hint" id="whatsappHint">
-              গ্রাহক নিজে তার WhatsApp নম্বর লিখবে—আপনি পরে সেখানে যোগাযোগ করবেন।
-              নম্বর না দিলেও সাবমিট হবে; দিলে ফরম্যাট সঠিক হতে হবে (+8801… বা 01…).
-            </p>
-            <div class="error" id="err-whatsapp" aria-live="polite"></div>
-          </div>
-        </fieldset>
-
-        <!-- TRX (Bangla) — FIXED -->
-        <fieldset>
-          <legend>পেমেন্ট নিশ্চিতকরণ (ঐচ্ছিক)</legend>
-          <div class="field">
-            <label for="trxId">TRX ID</label>
-            <input id="trxId" name="trxId" type="text" inputmode="numeric"
-                   placeholder="উদাহরণ: 1234567890 (১০ digit)"
-                   pattern="^\d{10}$"
-                   aria-describedby="trxHint" />
-            <p class="hint" id="trxHint">
-              TRX ID অবশ্যই ১০ সংখ্যার হবে (শুধু 0–9 digit)।
-            </p>
-            <div class="error" id="err-trxId" aria-live="polite"></div>
-            <p class="hint">
-              01630249778 এই নম্বরে 300 টাকা Send Money করে আপনার TRX ID দিন।
-              TRX ID দিলে 5 মিনিটের মধ্যে আপনার WhatsApp-এ যোগাযোগ করা হবে। Thank you.
-            </p>
-          </div>
-        </fieldset>
-
-        <div class="tos" style="display:grid;grid-template-columns:20px 1fr;gap:10px;align-items:start">
-          <input id="agree" type="checkbox" required />
-          <label for="agree">I agree to the Terms & Privacy Policy. This is a demo — do not provide real data.</label>
+  <div id="topbar" class="topbar sticky top-0 z-40 backdrop-blur-xl bg-base-900/70 border-b border-white/10">
+    <header class="max-w-[min(1100px,92vw)] mx-auto px-4 py-3">
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0 brand">
+          <button id="menuToggle" class="md:hidden inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white/10 hover:bg-white/15" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+          </button>
+          <span class="logo shrink-0"></span>
+          <h1 class="truncate text-[clamp(18px,4.2vw,28px)] font-extrabold tracking-[-0.02em] text-white">স্বর্ণের বাজার মূল্য</h1>
         </div>
+        <nav class="hidden md:flex items-center gap-2 nav-rail">
+          <button class="nav-link" data-go="today">
+            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12h18"/><path d="M12 3v18" opacity=".6"/></svg>
+            আজকের দাম
+          </button>
+          <button class="nav-link" data-go="old">
+            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><rect x="3" y="4" width="4" height="16" rx="1"/></svg>
+            পুরাতন
+          </button>
+          <button class="nav-link" data-go="new">
+            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            নতুন
+          </button>
+          <a href="#about" class="nav-link">
+            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01"/><path d="M11 12h1v4h1"/></svg>
+            About
+          </a>
+          <a href="#policy" class="nav-link">
+            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M8 2v4M16 2v4"/></svg>
+            নীতিমালা
+          </a>
+          <a href="#contact" class="nav-link">
+            <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6"/><path d="M3 10l9 6 9-6"/></svg>
+            Contact
+          </a>
+          <span id="navUnderline" class="nav-underline"></span>
+        </nav>
+      </div>
+    </header>
+  </div>
 
-        <div class="actions">
-          <button type="submit" aria-label="Create account">Create Account</button>
-          <button type="reset" class="ghost" id="resetBtn">Reset</button>
-          <span id="formStatus" class="status" role="status" aria-live="polite"></span>
+  <!-- Mobile menu -->
+
+  <div id="mobileMenu" class="md:hidden fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50" data-close="menu"></div>
+    <div id="mobilePanel" class="absolute left-0 top-0 h-full w-[78%] max-w-xs bg-base-900 border-r border-white/10 p-4 flex flex-col gap-2">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2">
+          <span class="logo w-5 h-5"></span><span class="font-bold">মেনু</span>
         </div>
-      </form>
+        <button class="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/15" data-close="menu" aria-label="Close menu">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <button class="nav-link text-left" data-go="today" data-close="menu">আজকের দাম</button>
+      <button class="nav-link text-left" data-go="old" data-close="menu">পুরাতন গহনা</button>
+      <button class="nav-link text-left" data-go="new" data-close="menu">নতুন গহনা</button>
+      <a href="#about" class="nav-link" data-close="menu">About</a>
+      <a href="#policy" class="nav-link" data-close="menu">নীতিমালা</a>
+      <a href="#contact" class="nav-link" data-close="menu">Contact</a>
+      <div class="mt-4 flex items-center gap-2 text-xs">
+        <button id="themeToggle" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/15">Light / Dark</button>
+        <button id="densityToggle" class="px-3 py-1 rounded-full bg-white/10 hover:bg-white/15">Compact</button>
+      </div>
+    </div>
+  </div>
 
-      <footer style="text-align:center;color:var(--muted);font-size:12px;margin-top:10px">
-        © Demo Form, for educational purposes.
-      </footer>
+  <!-- TOP BANNER AD -->
 
-      <noscript>
-        <p class="note">JavaScript is disabled — the form will submit with basic browser validation.</p>
-      </noscript>
+  <div class="max-w-[min(1100px,92vw)] mx-auto px-4">
+    <div id="ad-top" class="relative ad-banner" data-size="banner" role="complementary" aria-label="Advertisement">
+      <span class="ad-label">Ad</span>
+      <div class="py-6 text-xs sm:text-sm">Banner Ad (auto)</div>
+    </div>
+  </div>
+
+  <main class="max-w-[min(1100px,92vw)] mx-auto px-4 pb-24 space-y-8">
+    <!-- SECTION: TODAY -->
+    <section data-section="today" class="p-[1px] rounded-2xl bg-gradient-to-br from-amber-400/35 to-fuchsia-500/25">
+      <div class="relative rounded-2xl p-5 md:p-7 bg-neutral-900/70 glass shadow-soft shadow-ring">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-[clamp(16px,3.5vw,20px)] font-semibold">আজকের স্বর্ণের দাম</h3>
+          <span id="status1" class="text-xs px-2 py-1 rounded-full bg-neutral-800">Connecting…</span>
+        </div>
+        <div class="table-wrap">
+          <table class="rtable min-w-full text-[15px]" id="tableToday">
+            <thead class="bg-amber-500/95 text-black">
+              <tr>
+                <th class="px-4 py-3 text-left">স্বর্ণ</th>
+                <th class="px-4 py-3 text-left">বিবরণ</th>
+                <th class="px-4 py-3 text-left">মূল্য (BDT)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5 bg-neutral-900/30">
+              <tr>
+                <td class="px-4 py-3" data-label="স্বর্ণ">২৪ ক্যারেট</td>
+                <td class="px-4 py-3" data-label="বিবরণ">প্রতি ভরি বিস্কুট (99.99%)</td>
+                <td class="px-4 py-3 price" data-label="মূল্য (BDT)"><span data-key="price_24k_biscuit_bhori">৳ —</span></td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3" data-label="স্বর্ণ">২৪ ক্যারেট</td>
+                <td class="px-4 py-3" data-label="বিবরণ">প্রতি ভরি পাশা স্বর্ণ (99.50%)</td>
+                <td class="px-4 py-3 price" data-label="মূল্য (BDT)"><span data-key="price_24k_pasha_bhori">৳ —</span></td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3" data-label="স্বর্ণ">২৪ ক্যারেট</td>
+                <td class="px-4 py-3" data-label="বিবরণ">প্রতি গ্রাম বিস্কুট (99.99%)</td>
+                <td class="px-4 py-3 price" data-label="মূল্য (BDT)"><span data-key="price_24k_biscuit_gram">৳ —</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="mt-3 text-rose-300/90 text-xs">সর্বশেষ আপডেট: <span id="updatedAt1">—</span></p>
+      </div>
     </section>
+
+```
+<!-- MID AD -->
+<div id="ad-mid" class="relative ad-banner" data-size="banner" role="complementary" aria-label="Advertisement">
+  <span class="ad-label">Ad</span>
+  <div class="py-6 text-xs sm:text-sm">Banner Ad (auto)</div>
+</div>
+
+<!-- SECTION: OLD -->
+<section data-section="old" class="p-[1px] rounded-2xl bg-gradient-to-br from-amber-400/30 to-fuchsia-500/18">
+  <div class="relative rounded-2xl p-5 md:p-7 bg-neutral-900/70 glass shadow-soft shadow-ring">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-[clamp(16px,3.5vw,20px)] font-semibold">পুরাতন গহনা ক্রয় বিক্রয়</h3>
+    </div>
+    <div class="table-wrap">
+      <table class="rtable min-w-full text-[15px]" id="tableOld">
+        <thead class="bg-amber-500/95 text-black">
+          <tr>
+            <th class="px-4 py-3 text-left">স্বর্ণ</th>
+            <th class="px-4 py-3 text-left">বিবরণ</th>
+            <th class="px-4 py-3 text-left">মূল্য (BDT)</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5 bg-neutral-900/30">
+          <tr>
+            <td class="px-4 py-3" data-label="স্বর্ণ">২২ ক্যারেট</td>
+            <td class="px-4 py-3" data-label="বিবরণ">প্রতি ভরি গহনা (91.67%)</td>
+            <td class="px-4 py-3 price" data-label="মূল্য (BDT)"><span data-key="price_old_22k_bhori">৳ —</span></td>
+          </tr>
+          <tr>
+            <td class="px-4 py-3" data-label="স্বর্ণ">২১ ক্যারেট</td>
+            <td class="px-4 py-3" data-label="বিবরণ">প্রতি ভরি গহনা (87.50%)</td>
+            <td class="px-4 py-3 price" data-label="মূল্য (BDT)"><span data-key="price_old_21k_bhori">৳ —</span></td>
+          </tr>
+          <tr>
+            <td class="px-4 py-3" data-label="স্বর্ণ">২২ ক্যারেট</td>
+            <td class="px-4 py-3" data-label="বিবরণ">প্রতি গ্রাম গহনা (91.67%)</td>
+            <td class="px-4 py-3 price" data-label="মূল্য (BDT)"><span data-key="price_old_22k_gram">৳ —</span></td>
+          </tr>
+          <tr>
+            <td class="px-4 py-3" data-label="স্বর্ণ">২১ ক্যারেট</td>
+            <td class="px-4 py-3" data-label="বিবরণ">প্রতি গ্রাম গহনা (87.50%)</td>
+            <td class="px-4 py-3 price" data-label="মূল্য (BDT)"><span data-key="price_old_21k_gram">৳ —</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="mt-3 text-rose-300/90 text-xs">সর্বশেষ আপডেট: <span id="updatedAtOld">—</span></p>
+  </div>
+</section>
+
+<!-- SECTION: NEW -->
+<section data-section="new" class="p-[1px] rounded-2xl bg-gradient-to-br from-amber-400/22 to-fuchsia-500/12">
+  <div class="relative rounded-2xl p-5 md:p-7 bg-neutral-900/70 glass shadow-soft shadow-ring">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-[clamp(16px,3.5vw,20px)] font-semibold">নতুন গহনা ক্রয়</h3>
+      <span id="status2" class="text-xs px-2 py-1 rounded-full bg-neutral-800">Connecting…</span>
+    </div>
+    <div class="table-wrap">
+      <table class="rtable min-w-full text-[15px]" id="tableNew">
+        <thead class="bg-amber-500/95 text-black">
+          <tr>
+            <th class="px-4 py-3 text-left">নতুন গহনা ক্রয়</th>
+            <th class="px-4 py-3 text-left">বিবরণ</th>
+            <th class="px-4 py-3 text-left">মূল্য (BDT)</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5 bg-neutral-900/30">
+          <tr>
+            <td class="px-4 py-3" data-label="নতুন গহনা ক্রয়">২২ ক্যারেট প্রতি ভরি</td>
+            <td class="px-4 py-3" data-label="বিবরণ">গহনা (৯১.৬৭%)</td>
+            <td class="px-4 py-3 price" data-label="মূল্য (BDT)"><span data-key="price_new_22k_bhori">৳ —</span> <span class="text-xs opacity-70">/ ভরি</span></td>
+          </tr>
+          <tr>
+            <td class="px-4 py-3" data-label="নতুন গহনা ক্রয়">২১ ক্যারেট প্রতি ভরি</td>
+            <td class="px-4 py-3" data-label="বিবরণ">গহনা (৮৭.৫০%)</td>
+            <td class="px-4 py-3 price" data-label="মূল্য (BDT)"><span data-key="price_new_21k_bhori">৳ —</span> <span class="text-xs opacity-70">/ ভরি</span></td>
+          </tr>
+          <tr>
+            <td class="px-4 py-3" data-label="নতুন গহনা ক্রয়">২২ ক্যারেট প্রতি গ্রাম</td>
+            <td class="px-4 py-3" data-label="বিবরণ">গহনা (৯১.৬৭%)</td>
+            <td class="px-4 py-3 price" data-label="মূল্য (BDT)"><span data-key="price_new_22k_gram">৳ —</span> <span class="text-xs opacity-70">/ গ্রাম</span></td>
+          </tr>
+          <tr>
+            <td class="px-4 py-3" data-label="নতুন গহনা ক্রয়">২১ ক্যারেট প্রতি গ্রাম</td>
+            <td class="px-4 py-3" data-label="বিবরণ">গহনা (৮৭.৫০%)</td>
+            <td class="px-4 py-3 price" data-label="মূল্য (BDT)"><span data-key="price_new_21k_gram">৳ —</span> <span class="text-xs opacity-70">/ গ্রাম</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="mt-3 text-rose-300/90 text-xs">সর্বশেষ আপডেট: <span id="updatedAt2">—</span></p>
+  </div>
+</section>
+
+<!-- BOTTOM AD -->
+<div id="ad-bottom" class="relative ad-banner" data-size="banner" role="complementary" aria-label="Advertisement">
+  <span class="ad-label">Ad</span>
+  <div class="py-6 text-xs sm:text-sm">Banner Ad (auto)</div>
+</div>
+
+<!-- INFO SECTIONS -->
+<section id="about" class="mt-10 p-[1px] rounded-2xl bg-gradient-to-br from-amber-400/15 to-fuchsia-500/10">
+  <div class="rounded-2xl p-5 md:p-7 bg-neutral-900/70 glass shadow-soft shadow-ring border border-white/10">
+    <h3 class="text-lg font-semibold mb-2">About</h3>
+    <p class="text-sm text-gray-300 leading-relaxed">এই সাইটে প্রদর্শিত স্বর্ণের দাম Firebase Firestore থেকে রিয়েলটাইমে আপডেট হয়। ডেটা পাবলিক-রিড কনফিগে রাখা হয়েছে এবং শুধুমাত্র অনুমোদিত সোর্স থেকে আপডেট করা হয়।</p>
+    <p class="mt-2 text-xs text-rose-300/90">সর্বশেষ আপডেট: <span id="updatedAtTop">—</span></p>
+  </div>
+</section>
+
+<section id="policy" class="mt-6 p-[1px] rounded-2xl bg-gradient-to-br from-amber-400/15 to-fuchsia-500/10">
+  <div class="rounded-2xl p-5 md:p-7 bg-neutral-900/70 glass shadow-soft shadow-ring border border-white/10">
+    <h3 class="text-lg font-semibold mb-2">নীতিমালা</h3>
+    <ul class="text-sm text-gray-300 list-disc pl-5 space-y-1">
+      <li>দাম তথ্যগত উদ্দেশ্যে—লেনদেনের আগে যাচাই করুন।</li>
+      <li>Firestore: Public read, write নিষ্ক্রিয় (সিকিউরিটি রুলস মেনে)।</li>
+      <li>বিজ্ঞাপন সক্রিয় থাকলে কুকি/ট্র্যাকিং হতে পারে।</li>
+    </ul>
+  </div>
+</section>
+
+<section id="contact" class="mt-6 p-[1px] rounded-2xl bg-gradient-to-br from-amber-400/15 to-fuchsia-500/10">
+  <div class="rounded-2xl p-5 md:p-7 bg-neutral-900/70 glass shadow-soft shadow-ring border border-white/10">
+    <h3 class="text-lg font-semibold mb-2">Contact</h3>
+    <form class="grid gap-3 max-w-xl" onsubmit="event.preventDefault(); alert('Demo form. Backend attach করলে সাবমিট হবে.');">
+      <input type="text" name="name" placeholder="আপনার নাম" class="px-3 py-2 rounded-lg bg-white/5 border border-white/10 outline-none focus:border-white/20" required>
+      <input type="email" name="email" placeholder="ইমেইল" class="px-3 py-2 rounded-lg bg-white/5 border border-white/10 outline-none focus:border-white/20" required>
+      <textarea name="message" rows="4" placeholder="বার্তা" class="px-3 py-2 rounded-lg bg-white/5 border border-white/10 outline-none focus:border-white/20" required></textarea>
+      <button type="submit" class="justify-self-start px-4 py-2 rounded-lg bg-amber-500 text-black font-semibold hover:bg-amber-400">Send</button>
+      <p class="text-xs text-gray-400">(ডেমো ফর্ম—ব্যাকএন্ড যুক্ত করলে সাবমিট কাজ করবে)</p>
+    </form>
+  </div>
+</section>
+```
+
   </main>
 
-  <dialog id="successDialog" inert>
-    <p>✅ Submitted! (Formspree received your data.)</p>
-    <form method="dialog"><button>OK</button></form>
-  </dialog>
+  <!-- Bottom quick nav (mobile) -->
 
-  <script>
-    // Helper
-    const $ = (s, el=document) => el.querySelector(s);
+  <nav class="fixed bottom-3 left-1/2 -translate-x-1/2 z-40 md:hidden bottom-tabs">
+    <div class="tabs">
+      <button class="tab active" data-go="today">আজ</button>
+      <button class="tab" data-go="old">পুরাতন</button>
+      <button class="tab" data-go="new">নতুন</button>
+    </div>
+  </nav>
 
-    // Elements
-    const form = $('#signupForm');
-    const statusEl = $('#formStatus');
-    const dobInput = $('#dob');
-    const pw = $('#password');
-    const cpw = $('#confirm');
-    const phone = $('#phone');
-    const pwMeter = $('#pwMeter');
-    const dlg = $('#successDialog');
-    const whatsapp = $('#whatsapp');
-    const trxId = $('#trxId');
+  <!-- Firebase + App Code -->
 
-    const useRandomEmail = $('#useRandomEmail');
-    const emailInput = $('#email');
+  <script type="module">
+    // TODO: আপনার Firebase কনফিগ বসান
+   const firebaseConfig = {
+apiKey: "AIzaSyAEUsjBiXAp0vbO5j7Y4VAhEDF6aorsnGc",
+authDomain: "cgbazaronline.firebaseapp.com",
+projectId: "cgbazaronline",
+storageBucket: "cgbazaronline.appspot.com",
+messagingSenderId: "849573962594",
+appId: "1:849573962594:web:2358188fde9b0134a7423b",
+measurementId: "G-QM719839V1"
+};
 
-    const skipPhone = $('#skipPhone');
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, doc, onSnapshot as onDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    function showStatus(msg, cls='ok'){ statusEl.textContent = msg; statusEl.className = `status ${cls}`; }
-    function setFieldValidity(input, valid, msg=''){
-      input.setAttribute('aria-invalid', String(!valid));
-      input.setCustomValidity(valid ? '' : msg);
-      const errEl = document.getElementById(`err-${input.id}`);
-      if (errEl) errEl.textContent = valid ? '' : msg;
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const moneyFmt = new Intl.NumberFormat('bn-BD',{ style:'currency', currency:'BDT', maximumFractionDigits:0 });
+
+    function setLiveBadge(el,ok){
+      if(!el) return;
+      el.textContent = ok ? 'Live' : 'Error';
+      el.className = 'text-xs px-2 py-1 rounded-full ' + (ok ? 'bg-green-200 text-green-900' : 'bg-red-200 text-red-900');
     }
-
-    // Password regex fixed (single backslashes)
-    function passwordStrong(p){ return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/.test(p); }
-    function passwordScore(p){
-      let s=0; if(p.length>=8)s++; if(/[A-Z]/.test(p))s++; if(/[a-z]/.test(p))s++; if(/\d/.test(p))s++; if(/[^\w\s]/.test(p))s++;
-      return Math.min(s,4);
-    }
-
-    function ageOK(dobStr){
-      const dob = new Date(dobStr); if(isNaN(dob)) return false;
-      const t = new Date();
-      let age = t.getFullYear() - dob.getFullYear();
-      const m = t.getMonth() - dob.getMonth();
-      if (m < 0 || (m === 0 && t.getDate() < dob.getDate())) age--;
-      return age >= 13;
-    }
-
-    // DOB max = today - 13y
-    (function setDobMax(){
-      const t = new Date(); t.setFullYear(t.getFullYear()-13);
-      const y=t.getFullYear(), m=String(t.getMonth()+1).padStart(2,'0'), d=String(t.getDate()).padStart(2,'0');
-      if (dobInput) dobInput.max = `${y}-${m}-${d}`;
-    })();
-
-    // Random email generator
-    function genRandomEmail(){
-      const ts = Date.now().toString(36);
-      const rnd = Math.floor(Math.random()*9000)+1000;
-      return `user${ts}${rnd}@example.com`;
-    }
-
-    // EMAIL: keep visible, lock/unlock
-    useRandomEmail?.addEventListener('change', ()=>{
-      const on = useRandomEmail.checked;
-      if (on){
-        const randomEmail = genRandomEmail();
-        emailInput.value = randomEmail;
-        emailInput.readOnly = true;
-        emailInput.classList.add('locked');
-        emailInput.setAttribute('aria-readonly', 'true');
-        emailInput.required = true;
-      } else {
-        emailInput.readOnly = false;
-        emailInput.classList.remove('locked');
-        emailInput.removeAttribute('aria-readonly');
-        emailInput.value = '';
-        emailInput.required = true;
-      }
-      setFieldValidity(emailInput, true, '');
-    });
-
-    // PHONE: keep visible, lock/unlock + set "SKIP number"
-    skipPhone?.addEventListener('change', ()=>{
-      const on = skipPhone.checked;
-      if (on){
-        phone.value = 'SKIP number';
-        phone.readOnly = true;
-        phone.classList.add('locked');
-        phone.setAttribute('aria-readonly', 'true');
-        phone.required = false;
-        setFieldValidity(phone, true, '');
-      } else {
-        phone.readOnly = false;
-        phone.classList.remove('locked');
-        phone.removeAttribute('aria-readonly');
-        phone.value = '';
-        phone.required = false;
-        setFieldValidity(phone, true, '');
-      }
-    });
-
-    // Live validation
-    const pwMeterEl = pwMeter;
-    pw?.addEventListener('input', ()=>{
-      if (pwMeterEl) pwMeterEl.value = passwordScore(pw.value);
-      const ok = passwordStrong(pw.value);
-      setFieldValidity(pw, !pw.value || ok, ok ? '' : 'Password does not meet the rules.');
-    });
-    cpw?.addEventListener('input', ()=>{
-      const match = pw.value === cpw.value;
-      setFieldValidity(cpw, !cpw.value || match, match ? '' : 'Passwords do not match.');
-    });
-    phone?.addEventListener('input', ()=>{
-      if (skipPhone?.checked || phone.readOnly) { setFieldValidity(phone, true, ''); return; }
-      const pattern = new RegExp(phone.getAttribute('pattern'));
-      const ok = !phone.value || pattern.test(phone.value);
-      setFieldValidity(phone, ok, ok ? '' : 'Phone format is invalid.');
-    });
-    whatsapp?.addEventListener('input', ()=>{
-      const pattern = new RegExp(whatsapp.getAttribute('pattern'));
-      const ok = !whatsapp.value || pattern.test(whatsapp.value);
-      setFieldValidity(whatsapp, ok, ok ? '' : 'WhatsApp নম্বরের ফরম্যাট ঠিক নেই।');
-    });
-    trxId?.addEventListener('input', ()=>{
-      const pattern = new RegExp(trxId.getAttribute('pattern'));
-      const ok = !trxId.value || pattern.test(trxId.value);
-      setFieldValidity(trxId, ok, ok ? '' : 'TRX ID ১০ digit হতে হবে (শুধু সংখ্যা)।');
-    });
-
-    // Eye toggles
-    document.getElementById('togglePw')?.addEventListener('click', ()=>{ pw.type = pw.type === 'password' ? 'text' : 'password'; });
-    document.getElementById('toggleCpw')?.addEventListener('click', ()=>{ cpw.type = cpw.type === 'password' ? 'text' : 'password'; });
-
-    // Submit to Formspree
-    form.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-
-      if (!form.checkValidity()){
-        showStatus('⚠️ Please fill out required fields correctly.', 'warn');
-        form.reportValidity();
-        return;
-      }
-      if (!passwordStrong(pw.value)){
-        setFieldValidity(pw, false, 'Password does not meet the rules.');
-        showStatus('Password does not meet the rules.', 'err');
-        pw.focus(); return;
-      }
-      const match = pw.value === cpw.value;
-      setFieldValidity(cpw, match, match ? '' : 'Passwords do not match.');
-      if (!match){ showStatus('Passwords do not match.', 'err'); cpw.focus(); return; }
-
-      const ageOk = ageOK(dobInput.value);
-      setFieldValidity(dobInput, ageOk, ageOk ? '' : 'You must be at least 13 years old.');
-      if (!ageOk){ showStatus('You must be at least 13 years old.', 'err'); dobInput.focus(); return; }
-
-      if (phone && phone.value && !phone.readOnly){
-        const ok = new RegExp(phone.getAttribute('pattern')).test(phone.value);
-        setFieldValidity(phone, ok, ok ? '' : 'Phone format is invalid.');
-        if (!ok){ showStatus('Phone format is invalid.', 'err'); phone.focus(); return; }
-      }
-      if (whatsapp && whatsapp.value.trim()){
-        const ok = new RegExp(whatsapp.getAttribute('pattern')).test(whatsapp.value.trim());
-        setFieldValidity(whatsapp, ok, ok ? '' : 'WhatsApp নম্বরের ফরম্যাট ঠিক নেই।');
-        if (!ok){ showStatus('WhatsApp নম্বরের ফরম্যাট ঠিক নেই।', 'err'); whatsapp.focus(); return; }
-      }
-      if (trxId && trxId.value.trim()){
-        const ok = new RegExp(trxId.getAttribute('pattern')).test(trxId.value.trim());
-        setFieldValidity(trxId, ok, ok ? '' : 'TRX ID ১০ digit হতে হবে (শুধু সংখ্যা)।');
-        if (!ok){ showStatus('TRX ID ১০ digit হতে হবে (শুধু সংখ্যা)।', 'err'); trxId.focus(); return; }
-      }
-
-      showStatus('Submitting…', 'warn');
-
+    function setUpdated(el,ts){
       try{
-        const data = new FormData(form);
-        const res = await fetch(form.action, {
-          method: form.method,
-          body: data,
-          headers: { 'Accept': 'application/json' }
-        });
+        const d = ts?.toDate ? ts.toDate() : (ts instanceof Date ? ts : null);
+        el.textContent = d ? d.toLocaleString('bn-BD',{hour12:false}) : '—';
+      }catch{ el.textContent='—'; }
+    }
 
-        const result = await res.json().catch(()=> ({}));
+    const status1 = document.getElementById('status1');
+    const status2 = document.getElementById('status2');
+    const updatedAt1 = document.getElementById('updatedAt1');
+    const updatedAt2 = document.getElementById('updatedAt2');
+    const updatedAtOld = document.getElementById('updatedAtOld');
+    const updatedAtTop = document.getElementById('updatedAtTop');
 
-        if (!res.ok){
-          const msg = result?.errors?.[0]?.message || `Submission failed (${res.status})`;
-          showStatus(msg, 'err');
-          return;
+    const els = Array.from(document.querySelectorAll('[data-key]'))
+      .reduce((acc, span) => { acc[span.dataset.key] = span; return acc; }, {});
+
+    onSnapshot(collection(db,'prices'), (snap) => {
+      setLiveBadge(status1,true); setLiveBadge(status2,true);
+      snap.docs.forEach(d => {
+        const data = d.data() || {};
+        const key = data.key || d.id;
+        const el = els[key];
+        if (el && typeof data.price === 'number') {
+          const prev = el.getAttribute('data-prev');
+          const next = moneyFmt.format(data.price).replace('৳\u00A0','৳');
+          if(prev!==next){
+            el.textContent = next; el.setAttribute('data-prev', next);
+            const td = el.closest('td'); if(td){ td.classList.add('flash'); setTimeout(()=>td.classList.remove('flash'),700); }
+          }
         }
+      });
+    }, ()=>{ setLiveBadge(status1,false); setLiveBadge(status2,false); });
 
-        showStatus('✅ Submitted successfully!', 'ok');
-        if (typeof dlg?.showModal === 'function'){ dlg.removeAttribute('inert'); dlg.showModal(); }
-        // form.reset(); // চাইলে রিসেট
-
-      } catch (err){
-        console.error(err);
-        showStatus('Network error. Please try again.', 'err');
-      }
+    // meta.updatedAt support (optional)
+    onDoc(doc(db,'meta','site'), (d)=>{
+      const data = d.data();
+      [updatedAt1,updatedAt2,updatedAtOld,updatedAtTop].forEach(el=> el && setUpdated(el, data?.updatedAt));
     });
 
-    // Reset
-    document.getElementById('resetBtn')?.addEventListener('click', ()=>{
-      showStatus('');
-      if (useRandomEmail?.checked){
-        useRandomEmail.checked = false;
-        emailInput.readOnly = false;
-        emailInput.classList.remove('locked');
-        emailInput.removeAttribute('aria-readonly');
-        emailInput.value = '';
-        emailInput.required = true;
+    // NAV: setView + underline + tabs + drawer
+    function highlightNav(view){
+      document.querySelectorAll('.nav-link[data-go], .tab').forEach(el=>{
+        const match = el.dataset.go === view;
+        el.classList.toggle('active', match);
+      });
+      moveUnderline();
+    }
+    function setView(view){
+      document.body.setAttribute('data-view',view);
+      highlightNav(view);
+      // Scroll to section smoothly (desktop links use anchors for about/policy/contact)
+      const map = {today:'[data-section="today"]', old:'[data-section="old"]', new:'[data-section="new"]'};
+      if(map[view]){
+        const t = document.querySelector(map[view]);
+        if(t) t.scrollIntoView({behavior:'smooth', block:'start'});
       }
-      if (skipPhone?.checked){
-        skipPhone.checked = false;
-        phone.readOnly = false;
-        phone.classList.remove('locked');
-        phone.removeAttribute('aria-readonly');
-        phone.value = '';
-        phone.required = false;
-      }
-      [pw, cpw, phone, dobInput, whatsapp, trxId, emailInput].forEach(i=> i && setFieldValidity(i, true, ''));
-      if (pwMeter) pwMeter.value = 0;
-      if (dlg?.open) dlg.close();
-      dlg?.setAttribute('inert','');
+    }
+    document.querySelectorAll('.nav-link[data-go], .tab').forEach(btn=>{
+      btn.addEventListener('click',()=> setView(btn.dataset.go));
+    });
+
+    // Desktop underline
+    const navUnderline = document.getElementById('navUnderline');
+    function moveUnderline(){
+      const active = document.querySelector('nav .nav-link.active');
+      if(!active || !navUnderline) return;
+      const r = active.getBoundingClientRect();
+      const pr = active.parentElement.getBoundingClientRect();
+      navUnderline.style.width = r.width + 'px';
+      navUnderline.style.transform = `translateX(${r.left - pr.left}px)`;
+    }
+    window.addEventListener('resize', moveUnderline);
+    setTimeout(moveUnderline, 80);
+
+    // Drawer
+    const mMenu=document.getElementById('mobileMenu');
+    const mToggle=document.getElementById('menuToggle');
+    function openMenu(){ mMenu.classList.remove('hidden'); mMenu.classList.add('open'); mToggle?.setAttribute('aria-expanded','true'); }
+    function closeMenu(){ mMenu.classList.add('hidden'); mMenu.classList.remove('open'); mToggle?.setAttribute('aria-expanded','false'); }
+    mToggle?.addEventListener('click',openMenu);
+    mMenu?.addEventListener('click',(e)=>{ if(e.target.closest('[data-close="menu"]') || e.target===mMenu) closeMenu(); });
+    document.querySelectorAll('#mobileMenu .nav-link').forEach(b=>b.addEventListener('click',closeMenu));
+
+    // Sticky effect
+    const topbar=document.getElementById('topbar');
+    document.addEventListener('scroll',()=>{ if(window.scrollY>6){ topbar.classList.add('scrolled'); } else { topbar.classList.remove('scrolled'); } }, {passive:true});
+
+    // Ads (placeholder sizing). Replace with AdSense if needed.
+    function mountPlaceholder(id){
+      const c=document.getElementById(id); if(!c) return;
+      const w=c.clientWidth;
+      const text = w>=970?'970×90' : (w>=728?'728×90' : '320×100');
+      c.querySelector('div').textContent = 'Banner Ad ('+text+')';
+    }
+    ['ad-top','ad-mid','ad-bottom'].forEach(mountPlaceholder);
+    window.addEventListener('resize', ()=>['ad-top','ad-mid','ad-bottom'].forEach(mountPlaceholder));
+
+    // Density + theme toggles (optional—mobile drawerেও আছে)
+    document.getElementById('densityToggle')?.addEventListener('click',()=>{
+      document.querySelectorAll('table.rtable td, table.rtable th').forEach(el=>{
+        el.classList.toggle('py-2'); el.classList.toggle('py-3');
+      });
+    });
+    document.getElementById('themeToggle')?.addEventListener('click',()=>{
+      document.documentElement.classList.toggle('dark');
     });
   </script>
+
+  <!--
+  Firestore data model (উদাহরণ):
+  Collection: prices
+    Doc ID: price_24k_biscuit_bhori { key:"price_24k_biscuit_bhori", price:158969 }
+    Doc ID: price_24k_pasha_bhori   { key:"price_24k_pasha_bhori",   price:158174 }
+    Doc ID: price_24k_biscuit_gram  { key:"price_24k_biscuit_gram",  price:13634 }
+    Doc ID: price_old_22k_bhori     { key:"price_old_22k_bhori",     price:145727 }
+    Doc ID: price_old_21k_bhori     { key:"price_old_21k_bhori",     price:139098 }
+    Doc ID: price_old_22k_gram      { key:"price_old_22k_gram",      price:12498 }
+    Doc ID: price_old_21k_gram      { key:"price_old_21k_gram",      price:11929 }
+    Doc ID: price_new_22k_bhori     { key:"price_new_22k_bhori",     price:165200 }
+    Doc ID: price_new_21k_bhori     { key:"price_new_21k_bhori",     price:157697 }
+    Doc ID: price_new_22k_gram      { key:"price_new_22k_gram",      price:14164 }
+    Doc ID: price_new_21k_gram      { key:"price_new_21k_gram",      price:13520 }
+
+  Optional Collection: meta
+    Doc: site { updatedAt: serverTimestamp() }
+
+  Security rules (public read, no write):
+  rules_version = '2';
+  service cloud.firestore {
+    match /databases/{database}/documents {
+      match /prices/{docId} { allow read: if true; allow write: if false; }
+      match /meta/{docId}   { allow read: if true; allow write: if false; }
+    }
+  }
+  -->
+
 </body>
 </html>
