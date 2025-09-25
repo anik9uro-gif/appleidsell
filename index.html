@@ -390,14 +390,22 @@ apiKey: "AIzaSyDt5cJ0LIrZV5NGPS02QeEj9zogPyMm3Wg",
       el.textContent = ok ? 'Live' : 'Error';
       el.className = 'text-xs px-2 py-1 rounded-full ' + (ok ? 'bg-green-200 text-green-900' : 'bg-red-200 text-red-900');
     }
-    function setUpdated(el,ts){
-  try{
+    function setUpdated(el, ts){
+  try {
     const d = ts?.toDate ? ts.toDate() : (ts instanceof Date ? ts : null);
-    el.textContent = d 
-      ? d.toLocaleString('bn-BD',{ timeZone: 'Asia/Dhaka', hour12:false }) 
-      : '—';
-  }catch{ 
-    el.textContent='—';  }
+    if (!d) {
+      el.textContent = '—';
+      return;
+    }
+    // তারিখ + সময় (১২ ঘণ্টা AM/PM ফরম্যাটে)
+    el.textContent = d.toLocaleString('bn-BD', { 
+      timeZone: 'Asia/Dhaka', 
+      hour12: true, 
+      dateStyle: 'short',   
+      timeStyle: 'medium'   
+    });
+  } catch {
+    el.textContent = '—';  }
     }
 
     const status1 = document.getElementById('status1');
