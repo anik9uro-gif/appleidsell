@@ -1,209 +1,286 @@
 <!doctype html>
 <html lang="bn" class="dark">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Gold Admin Panel</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    darkMode:'class',
-    theme:{ extend:{ fontFamily:{sans:['Inter','ui-sans-serif','system-ui']} } }
-  }
-</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>স্বর্ণের দাম — Admin Panel</title>
+  <meta name="color-scheme" content="dark light" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode:'class',
+      theme:{ extend:{ fontFamily:{sans:['Inter','ui-sans-serif','system-ui']} } }
+    }
+  </script>
 </head>
 <body class="bg-neutral-900 text-gray-100 min-h-screen">
-  <div class="max-w-[min(920px,94vw)] mx-auto py-8">
-    <h1 class="text-2xl font-extrabold mb-3">স্বর্ণের দাম — Admin Panel</h1>
-    <p class="text-sm text-gray-300 mb-6">লগইন করে নিচের ফরম থেকে দাম আপডেট করুন। সেভ করলে <code>meta/site.updatedAt</code> নিজে থেকেই server timestamp হবে।</p>
+  <div class="max-w-[min(1100px,94vw)] mx-auto py-8">
+    <h1 class="text-2xl font-extrabold mb-2">স্বর্ণের দাম — Admin Panel</h1>
 
-    <!-- Auth card -->
+    <!-- AUTH CARD -->
     <div class="rounded-xl p-4 bg-white/5 border border-white/10 mb-6">
-      <div id="authArea">
-        <form id="loginForm" class="grid gap-3 max-w-sm">
-          <input id="email" class="px-3 py-2 rounded-lg bg-white/10 outline-none" type="email" placeholder="Admin ইমেইল" required>
-          <input id="password" class="px-3 py-2 rounded-lg bg-white/10 outline-none" type="password" placeholder="পাসওয়ার্ড" required>
-          <button class="px-4 py-2 rounded-lg bg-amber-500 text-black font-semibold">Sign in</button>
-          <p class="text-xs text-gray-400">নোট: Email/Password provider enable থাকতে হবে, এবং ইউজারের custom claim <code>role=admin</code> সেট থাকা চাই।</p>
-        </form>
-        <div id="whoami" class="hidden items-center justify-between gap-3">
-          <div>
-            <div class="text-sm">Signed in as: <span id="whoEmail" class="font-semibold"></span></div>
-            <div class="text-xs opacity-70">role: <span id="whoRole">—</span></div>
-          </div>
-          <button id="btnSignOut" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15">Sign out</button>
+      <form id="loginForm" class="grid gap-3 max-w-sm">
+        <input id="email" class="px-3 py-2 rounded-lg bg-white/10 outline-none" type="email" placeholder="Admin ইমেইল" required>
+        <input id="password" class="px-3 py-2 rounded-lg bg-white/10 outline-none" type="password" placeholder="পাসওয়ার্ড" required>
+        <button class="px-4 py-2 rounded-lg bg-amber-500 text-black font-semibold">Sign in</button>
+        <p class="text-xs text-gray-400">নোট: Email/Password provider enable থাকতে হবে; GitHub Pages ডোমেইন Authorized domains-এ যোগ করুন।</p>
+      </form>
+
+      <div id="whoami" class="hidden items-center justify-between gap-3">
+        <div>
+          <div class="text-sm">Signed in as: <span id="whoEmail" class="font-semibold"></span></div>
+          <div class="text-xs opacity-70">role: <span id="whoRole">—</span></div>
         </div>
+        <button id="btnSignOut" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15">Sign out</button>
       </div>
     </div>
 
-    <!-- Form -->
-    <div id="formCard" class="rounded-xl p-4 bg-white/5 border border-white/10">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="font-semibold">দামের ফরম</h2>
-        <div class="text-xs">Last loaded: <span id="lastLoaded">—</span></div>
+    <!-- LIVE PRICE TABLE (only after login) -->
+    <div id="panel" class="hidden rounded-xl p-4 bg-white/5 border border-white/10">
+      <div class="flex flex-wrap items-center gap-3 justify-between mb-3">
+        <div>
+          <h2 class="font-semibold">লাইভ প্রাইস টেবিল</h2>
+          <p class="text-xs text-gray-400">Firestore থেকে রিয়েলটাইমে লোড হয়</p>
+        </div>
+        <div class="text-xs">Last update: <span id="updatedAt">—</span></div>
       </div>
-      <div class="grid md:grid-cols-2 gap-3" id="formGrid"></div>
+
+      <div class="overflow-x-auto rounded-lg border border-white/10">
+        <table class="min-w-full text-sm">
+          <thead class="bg-amber-500 text-black">
+            <tr>
+              <th class="px-3 py-2 text-left">আইটেম</th>
+              <th class="px-3 py-2 text-left">Key</th>
+              <th class="px-3 py-2 text-left">Current (৳)</th>
+              <th class="px-3 py-2 text-left">New Price (৳)</th>
+            </tr>
+          </thead>
+          <tbody id="priceBody" class="divide-y divide-white/10 bg-white/5"></tbody>
+        </table>
+      </div>
+
       <div class="flex items-center gap-2 mt-4">
-        <button id="btnLoad" class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15">Load current</button>
-        <button id="btnSave" class="px-4 py-2 rounded-lg bg-amber-500 text-black font-semibold">Save all</button>
+        <button id="btnSave" class="px-4 py-2 rounded-lg bg-amber-500 text-black font-semibold">Save All</button>
         <span id="saveMsg" class="text-sm"></span>
       </div>
-      <p class="text-xs text-gray-400 mt-3">সেভ করলে: <code>prices/*</code> আপডেট + <code>meta/site.updatedAt = serverTimestamp()</code> হবে।</p>
+      <p class="text-xs text-gray-400 mt-2">সেভ করলে: <code>prices/*</code> আপডেট + <code>meta/site.updatedAt</code> = serverTimestamp()</p>
     </div>
   </div>
 
-<script type="module">
-  // ===== Firebase SDKs =====
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, getIdTokenResult } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  <!-- Firebase + App Code -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getAuth, signInWithEmailAndPassword, onAuthStateChanged,
+      signOut, getIdTokenResult
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getFirestore, doc, setDoc, collection, onSnapshot,
+      serverTimestamp, getDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  // ===== Your Config (from your code) =====
-  const firebaseConfig = {
-    apiKey: "AIzaSyDt5cJ0LIrZV5NGPS02QeEj9zogPyMm3Wg",
-    authDomain: "goldprice-6db2e.firebaseapp.com",
-    projectId: "goldprice-6db2e",
-    storageBucket: "goldprice-6db2e.firebasestorage.app",
-    messagingSenderId: "666004217573",
-    appId: "1:666004217573:web:832fe85d8b0d1e7b593e0c",
-    measurementId: "G-H8ZZJM7E5C"
-  };
+    // ==== YOUR CONFIG ====
+    const firebaseConfig = {
+      apiKey: "AIzaSyDt5cJ0LIrZV5NGPS02QeEj9zogPyMm3Wg",
+      authDomain: "goldprice-6db2e.firebaseapp.com",
+      projectId: "goldprice-6db2e",
+      storageBucket: "goldprice-6db2e.firebasestorage.app",
+      messagingSenderId: "666004217573",
+      appId: "1:666004217573:web:832fe85d8b0d1e7b593e0c",
+      measurementId: "G-H8ZZJM7E5C"
+    };
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+    const app  = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db   = getFirestore(app);
 
-  // ===== UI refs =====
-  const loginForm = document.getElementById('loginForm');
-  const whoami = document.getElementById('whoami');
-  const whoEmail = document.getElementById('whoEmail');
-  const whoRole = document.getElementById('whoRole');
-  const btnSignOut = document.getElementById('btnSignOut');
-  const formGrid = document.getElementById('formGrid');
-  const btnLoad = document.getElementById('btnLoad');
-  const btnSave = document.getElementById('btnSave');
-  const saveMsg = document.getElementById('saveMsg');
-  const lastLoaded = document.getElementById('lastLoaded');
+    // Fallback: claim না থাকলেও নির্দিষ্ট ইমেইলকে admin ধরুন
+    const ADMIN_EMAIL = 'anik3uro@gmail.com';
 
-  // ===== Price keys + labels (আপনার ফ্রন্টএন্ডের data-key এর সাথে ১:১ মিল) =====
-  const fields = [
-    ['price_24k_biscuit_bhori', '২৪K বিস্কুট / ভরি'],
-    ['price_24k_pasha_bhori',   '২৪K পাশা / ভরি'],
-    ['price_24k_biscuit_gram',  '২৪K বিস্কুট / গ্রাম'],
-    ['price_old_22k_bhori',     'পুরাতন ২২K / ভরি'],
-    ['price_old_21k_bhori',     'পুরাতন ২১K / ভরি'],
-    ['price_old_22k_gram',      'পুরাতন ২২K / গ্রাম'],
-    ['price_old_21k_gram',      'পুরাতন ২১K / গ্রাম'],
-    ['price_new_22k_bhori',     'নতুন ২২K / ভরি'],
-    ['price_new_21k_bhori',     'নতুন ২১K / ভরি'],
-    ['price_new_22k_gram',      'নতুন ২২K / গ্রাম'],
-    ['price_new_21k_gram',      'নতুন ২১K / গ্রাম'],
-  ];
+    // UI refs
+    const loginForm  = document.getElementById('loginForm');
+    const whoami     = document.getElementById('whoami');
+    const whoEmail   = document.getElementById('whoEmail');
+    const whoRole    = document.getElementById('whoRole');
+    const btnSignOut = document.getElementById('btnSignOut');
+    const panel      = document.getElementById('panel');
+    const priceBody  = document.getElementById('priceBody');
+    const btnSave    = document.getElementById('btnSave');
+    const saveMsg    = document.getElementById('saveMsg');
+    const updatedAt  = document.getElementById('updatedAt');
 
-  // Build form
-  const inputs = {};
-  fields.forEach(([key,label])=>{
-    const wrap = document.createElement('label');
-    wrap.className = 'block';
-    wrap.innerHTML = `
-      <span class="text-sm text-gray-300">${label}</span>
-      <input type="number" inputmode="numeric" step="1" class="mt-1 w-full px-3 py-2 rounded-lg bg-white/10 outline-none"
-             id="${key}" placeholder="সংখ্যা দিন (৳ ছাড়া)">
-      <span class="text-xs text-gray-400">key: ${key}</span>
-    `;
-    formGrid.appendChild(wrap);
-    inputs[key] = wrap.querySelector('input');
-  });
+    // লেবেল ম্যাপ (key -> label)
+    const LABELS = {
+      price_24k_biscuit_bhori: '২৪K বিস্কুট / ভরি',
+      price_24k_pasha_bhori:   '২৪K পাশা / ভরি',
+      price_24k_biscuit_gram:  '২৪K বিস্কুট / গ্রাম',
+      price_old_22k_bhori:     'পুরাতন ২২K / ভরি',
+      price_old_21k_bhori:     'পুরাতন ২১K / ভরি',
+      price_old_22k_gram:      'পুরাতন ২২K / গ্রাম',
+      price_old_21k_gram:      'পুরাতন ২১K / গ্রাম',
+      price_new_22k_bhori:     'নতুন ২২K / ভরি',
+      price_new_21k_bhori:     'নতুন ২১K / ভরি',
+      price_new_22k_gram:      'নতুন ২২K / গ্রাম',
+      price_new_21k_gram:      'নতুন ২১K / গ্রাম',
+    };
 
-  function bnNow(){
-    return new Date().toLocaleString('bn-BD',{ timeZone:'Asia/Dhaka', dateStyle:'short', timeStyle:'medium' });
-  }
+    const moneyFmt = new Intl.NumberFormat('bn-BD', {
+      style:'currency', currency:'BDT', maximumFractionDigits:0
+    });
 
-  // Auth state
-  onAuthStateChanged(auth, async (user)=>{
-    if(user){
-      const token = await getIdTokenResult(user, true);
-      whoEmail.textContent = user.email || '(no email)';
-      whoRole.textContent = token.claims?.role || '—';
-      loginForm.classList.add('hidden');
-      whoami.classList.remove('hidden');
-
-      if(token.claims?.role !== 'admin'){
-        saveMsg.textContent = '⚠️ আপনি admin নন (role=admin নেই), লিখতে পারবেন না।';
-        saveMsg.className = 'text-amber-400 text-sm';
-      } else {
-        saveMsg.textContent = '';
-      }
-    } else {
-      loginForm.classList.remove('hidden');
-      whoami.classList.add('hidden');
+    function fmtDhaka(ts){
+      try{
+        const d = ts?.toDate ? ts.toDate() : (ts instanceof Date ? ts : null);
+        return d ? d.toLocaleString('bn-BD',{ timeZone: 'Asia/Dhaka', dateStyle:'short', timeStyle:'medium' }) : '—';
+      }catch{ return '—'; }
     }
-  });
 
-  // Sign in
-  loginForm?.addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    const email = document.getElementById('email').value.trim();
-    const pass  = document.getElementById('password').value.trim();
-    try{
-      await signInWithEmailAndPassword(auth, email, pass);
-    }catch(err){
-      alert('Login failed: '+ (err?.message || err));
+    // DOM: একটি রো বানানো/খুঁজে আনা (key অনুযায়ী)
+    const rowMap = new Map(); // key -> {tr, curEl, input}
+    function ensureRow(key){
+      if(rowMap.has(key)) return rowMap.get(key);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="px-3 py-2">${LABELS[key] || '—'}</td>
+        <td class="px-3 py-2 text-xs text-gray-300">${key}</td>
+        <td class="px-3 py-2 font-semibold" data-cur>—</td>
+        <td class="px-3 py-2">
+          <input class="w-40 max-w-full px-3 py-1.5 rounded-lg bg-white/10 outline-none" type="number" step="1" placeholder="নতুন দাম">
+        </td>
+      `;
+      priceBody.appendChild(tr);
+      const curEl = tr.querySelector('[data-cur]');
+      const input = tr.querySelector('input');
+      const obj = { tr, curEl, input };
+      rowMap.set(key, obj);
+      return obj;
     }
-  });
 
-  // Sign out
-  btnSignOut?.addEventListener('click', ()=> signOut(auth));
-
-  // Load current prices
-  btnLoad?.addEventListener('click', async ()=>{
-    try{
-      const snap = await getDocs(collection(db,'prices'));
-      const byId = {};
-      snap.forEach(d=> byId[d.id] = d.data());
-      fields.forEach(([key])=>{
-        const v = byId[key]?.price;
-        if(typeof v === 'number') inputs[key].value = v;
+    // LIVE: prices collection subscribe (login-এর পর চালু হবে)
+    let unsubscribePrices = null;
+    async function startPricesLive(){
+      stopPricesLive();
+      unsubscribePrices = onSnapshot(collection(db,'prices'), (snap)=>{
+        snap.docs.forEach(d=>{
+          const data = d.data() || {};
+          const key  = data.key || d.id;
+          const price = typeof data.price === 'number' ? data.price : null;
+          const row = ensureRow(key);
+          if(price!=null){
+            row.curEl.textContent = moneyFmt.format(price).replace('৳\u00A0','৳');
+            row.tr.classList.add('animate-pulse'); // ছোট এনিমেশন
+            setTimeout(()=>row.tr.classList.remove('animate-pulse'),300);
+          }
+        });
+      }, (err)=>{
+        console.error('prices live error', err);
       });
-      lastLoaded.textContent = bnNow();
-      saveMsg.textContent = '✅ Loaded';
-      saveMsg.className = 'text-green-400 text-sm';
-    }catch(err){
-      saveMsg.textContent = '❌ Load error';
-      saveMsg.className = 'text-red-400 text-sm';
-      console.error(err);
     }
-  });
-
-  // Save all (prices + updatedAt)
-  btnSave?.addEventListener('click', async ()=>{
-    try{
-      const user = auth.currentUser;
-      const token = user ? await getIdTokenResult(user, true) : null;
-      if(!token?.claims?.role || token.claims.role !== 'admin'){
-        alert('আপনি admin নন (role=admin নেই), লিখতে পারবেন না.');
-        return;
-      }
-
-      // write each price doc
-      for(const [key] of fields){
-        const raw = inputs[key].value.trim();
-        if(raw==='') continue;
-        const num = Number(raw);
-        if(!Number.isFinite(num)) throw new Error(`Invalid number for ${key}`);
-        await setDoc(doc(db,'prices', key), { key, price: num }, { merge:true });
-      }
-      // meta/site.updatedAt = serverTimestamp()
-      await setDoc(doc(db,'meta','site'), { updatedAt: serverTimestamp() }, { merge:true });
-
-      saveMsg.textContent = '✅ Saved!';
-      saveMsg.className = 'text-green-400 text-sm';
-    }catch(err){
-      saveMsg.textContent = '❌ Save error';
-      saveMsg.className = 'text-red-400 text-sm';
-      console.error(err);
+    function stopPricesLive(){
+      if(typeof unsubscribePrices === 'function'){ unsubscribePrices(); }
+      unsubscribePrices = null;
     }
-  });
-</script>
+
+    // meta.site.updatedAt (Last update)
+    let unsubscribeMeta = null;
+    async function startMetaLive(){
+      stopMetaLive();
+      unsubscribeMeta = onSnapshot(doc(db,'meta','site'), (snap)=>{
+        const data = snap.data();
+        updatedAt.textContent = fmtDhaka(data?.updatedAt);
+      }, (err)=> console.error('meta live error', err));
+    }
+    function stopMetaLive(){
+      if(typeof unsubscribeMeta === 'function'){ unsubscribeMeta(); }
+      unsubscribeMeta = null;
+    }
+
+    // AUTH STATE
+    onAuthStateChanged(auth, async (user)=>{
+      if(user){
+        const token = await getIdTokenResult(user, true);
+        const email = user.email || '';
+        const isAdmin = (token.claims?.role === 'admin') || (email === ADMIN_EMAIL);
+
+        // UI toggle
+        loginForm.classList.add('hidden');
+        whoami.classList.remove('hidden');
+        whoEmail.textContent = email;
+        whoRole.textContent  = isAdmin ? 'admin' : (token.claims?.role || '—');
+
+        // Panel দেখান + লাইভ সাবস্ক্রিপশন চালু
+        panel.classList.remove('hidden');
+        await Promise.all([startPricesLive(), startMetaLive()]);
+
+        if(!isAdmin){
+          saveMsg.textContent = '⚠️ আপনি admin নন (role/email মিলেনি), লিখতে পারবেন না।';
+          saveMsg.className   = 'text-amber-400 text-sm';
+        }else{
+          saveMsg.textContent = '';
+          saveMsg.className   = 'text-green-400 text-sm';
+        }
+      }else{
+        // UI reset
+        panel.classList.add('hidden');
+        loginForm.classList.remove('hidden');
+        whoami.classList.add('hidden');
+        whoEmail.textContent = '';
+        whoRole.textContent  = '—';
+        saveMsg.textContent  = '';
+        saveMsg.className    = '';
+        priceBody.innerHTML  = '';
+        stopPricesLive();
+        stopMetaLive();
+      }
+    });
+
+    // SIGN IN
+    loginForm?.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const pass  = document.getElementById('password').value.trim();
+      try{
+        await signInWithEmailAndPassword(auth, email, pass);
+      }catch(err){
+        alert('Login failed: ' + (err?.code || err?.message || err));
+      }
+    });
+
+    // SIGN OUT
+    btnSignOut?.addEventListener('click', ()=> signOut(auth));
+
+    // SAVE ALL
+    btnSave?.addEventListener('click', async ()=>{
+      try{
+        const user = auth.currentUser;
+        if(!user){ alert('আগে সাইন-ইন করুন।'); return; }
+        const token = await getIdTokenResult(user, true);
+        const email = user.email || '';
+        const isAdmin = (token.claims?.role === 'admin') || (email === ADMIN_EMAIL);
+        if(!isAdmin){ alert('আপনি admin নন (role/email মিলেনি)'); return; }
+
+        // প্রতিটি রো থেকে ইনপুট পড়ে লিখুন
+        for(const [key] of Object.entries(LABELS)){
+          const row = rowMap.get(key);
+          if(!row) continue;
+          const raw = (row.input.value||'').trim();
+          if(raw==='') continue;
+          const num = Number(raw);
+          if(!Number.isFinite(num)) throw new Error(`Invalid number for ${key}`);
+          await setDoc(doc(db,'prices', key), { key, price: num }, { merge:true });
+          row.input.value = ''; // clear after save
+        }
+        // meta.updatedAt
+        await setDoc(doc(db,'meta','site'), { updatedAt: serverTimestamp() }, { merge:true });
+
+        saveMsg.textContent = '✅ Saved!';
+        saveMsg.className   = 'text-green-400 text-sm';
+      }catch(err){
+        saveMsg.textContent = '❌ Save error';
+        saveMsg.className   = 'text-red-400 text-sm';
+        console.error(err);
+      }
+    });
+  </script>
 </body>
 </html>
