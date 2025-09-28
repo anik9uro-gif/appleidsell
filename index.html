@@ -1,85 +1,93 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="bn" class="dark">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>স্বর্ণের দাম — Admin Panel</title>
-  <meta name="color-scheme" content="dark light" />
+  <title>Admin Panel - স্বর্ণের বাজার</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
-      darkMode:'class',
-      theme:{ extend:{ fontFamily:{sans:['Inter','ui-sans-serif','system-ui']} } }
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { sans: ['Inter','ui-sans-serif','system-ui'] } } }
     }
   </script>
 </head>
-<body class="bg-neutral-900 text-gray-100 min-h-screen">
-  <div class="max-w-[min(1100px,94vw)] mx-auto py-8">
-    <h1 class="text-2xl font-extrabold mb-2">স্বর্ণের দাম — Admin Panel</h1>
+<body class="bg-gray-900 text-white p-6">
 
-    <!-- AUTH CARD -->
-    <div class="rounded-xl p-4 bg-white/5 border border-white/10 mb-6">
-      <form id="loginForm" class="grid gap-3 max-w-sm">
-        <input id="email" class="px-3 py-2 rounded-lg bg-white/10 outline-none" type="email" placeholder="Admin ইমেইল" required>
-        <input id="password" class="px-3 py-2 rounded-lg bg-white/10 outline-none" type="password" placeholder="পাসওয়ার্ড" required>
-        <button class="px-4 py-2 rounded-lg bg-amber-500 text-black font-semibold">Sign in</button>
-        <p class="text-xs text-gray-400">নোট: Email/Password provider enable থাকতে হবে; GitHub Pages ডোমেইন Authorized domains-এ যোগ করুন।</p>
-      </form>
+  <h1 class="text-2xl font-bold mb-6">⚙️ Admin Panel</h1>
 
-      <div id="whoami" class="hidden items-center justify-between gap-3">
-        <div>
-          <div class="text-sm">Signed in as: <span id="whoEmail" class="font-semibold"></span></div>
-          <div class="text-xs opacity-70">role: <span id="whoRole">—</span></div>
-        </div>
-        <button id="btnSignOut" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/15">Sign out</button>
+  <!-- LOGIN -->
+  <div id="loginBox" class="space-y-3">
+    <input id="email" type="email" placeholder="Email" class="w-full px-3 py-2 rounded bg-white/10" required>
+    <input id="password" type="password" placeholder="Password" class="w-full px-3 py-2 rounded bg-white/10" required>
+    <button id="btnLogin" class="w-full px-3 py-2 rounded bg-amber-500 text-black font-semibold">Login</button>
+    <p id="loginMsg" class="text-sm text-red-400"></p>
+  </div>
+
+  <!-- PANEL -->
+  <div id="panel" class="hidden space-y-6 mt-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <h2 class="text-xl font-semibold">💰 স্বর্ণের দাম আপডেট</h2>
+        <div class="text-xs text-gray-300">Last update: <span id="updatedAt">—</span></div>
+      </div>
+      <div class="text-right">
+        <div class="text-sm">Signed in: <span id="whoEmail" class="font-semibold"></span></div>
+        <span id="whoRole" class="inline-block mt-1 px-3 py-1 rounded bg-gray-700 text-sm">—</span>
       </div>
     </div>
 
-    <!-- LIVE PRICE TABLE (only after login) -->
-    <div id="panel" class="hidden rounded-xl p-4 bg-white/5 border border-white/10">
-      <div class="flex flex-wrap items-center gap-3 justify-between mb-3">
-        <div>
-          <h2 class="font-semibold">লাইভ প্রাইস টেবিল</h2>
-          <p class="text-xs text-gray-400">Firestore থেকে রিয়েলটাইমে লোড হয়</p>
-        </div>
-        <div class="text-xs">Last update: <span id="updatedAt">—</span></div>
-      </div>
+    <!-- TODAY -->
+    <section class="p-4 bg-white/5 rounded-lg border border-white/10">
+      <h3 class="font-semibold mb-3">আজকের দাম</h3>
+      <table class="min-w-full text-sm">
+        <thead class="bg-amber-500 text-black">
+          <tr><th class="px-3 py-2 text-left">Item</th><th class="px-3 py-2 text-left">Current</th><th class="px-3 py-2 text-left">New Price</th></tr>
+        </thead>
+        <tbody id="tbody-today"></tbody>
+      </table>
+    </section>
 
-      <div class="overflow-x-auto rounded-lg border border-white/10">
-        <table class="min-w-full text-sm">
-          <thead class="bg-amber-500 text-black">
-            <tr>
-              <th class="px-3 py-2 text-left">আইটেম</th>
-              <th class="px-3 py-2 text-left">Key</th>
-              <th class="px-3 py-2 text-left">Current (৳)</th>
-              <th class="px-3 py-2 text-left">New Price (৳)</th>
-            </tr>
-          </thead>
-          <tbody id="priceBody" class="divide-y divide-white/10 bg-white/5"></tbody>
-        </table>
-      </div>
+    <!-- OLD -->
+    <section class="p-4 bg-white/5 rounded-lg border border-white/10">
+      <h3 class="font-semibold mb-3">পুরাতন গহনা</h3>
+      <table class="min-w-full text-sm">
+        <thead class="bg-amber-500 text-black">
+          <tr><th class="px-3 py-2 text-left">Item</th><th class="px-3 py-2 text-left">Current</th><th class="px-3 py-2 text-left">New Price</th></tr>
+        </thead>
+        <tbody id="tbody-old"></tbody>
+      </table>
+    </section>
 
-      <div class="flex items-center gap-2 mt-4">
-        <button id="btnSave" class="px-4 py-2 rounded-lg bg-amber-500 text-black font-semibold">Save All</button>
-        <span id="saveMsg" class="text-sm"></span>
-      </div>
-      <p class="text-xs text-gray-400 mt-2">সেভ করলে: <code>prices/*</code> আপডেট + <code>meta/site.updatedAt</code> = serverTimestamp()</p>
+    <!-- NEW -->
+    <section class="p-4 bg-white/5 rounded-lg border border-white/10">
+      <h3 class="font-semibold mb-3">নতুন গহনা</h3>
+      <table class="min-w-full text-sm">
+        <thead class="bg-amber-500 text-black">
+          <tr><th class="px-3 py-2 text-left">Item</th><th class="px-3 py-2 text-left">Current</th><th class="px-3 py-2 text-left">New Price</th></tr>
+        </thead>
+        <tbody id="tbody-new"></tbody>
+      </table>
+    </section>
+
+    <!-- SAVE -->
+    <div class="flex items-center gap-2">
+      <button id="btnSave" class="px-4 py-2 rounded bg-amber-500 text-black font-semibold">Save All</button>
+      <span id="saveMsg" class="text-sm"></span>
     </div>
   </div>
 
-  <!-- Firebase + App Code -->
+  <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import {
-      getAuth, signInWithEmailAndPassword, onAuthStateChanged,
-      signOut, getIdTokenResult
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import {
-      getFirestore, doc, setDoc, collection, onSnapshot,
-      serverTimestamp, getDoc
+    import { 
+      getFirestore, collection, doc, onSnapshot, setDoc, serverTimestamp 
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { 
+      getAuth, signInWithEmailAndPassword, onAuthStateChanged, getIdTokenResult, signOut 
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-    // ==== YOUR CONFIG ====
+    // ✅ আপনার প্রকল্পের কনফিগ
     const firebaseConfig = {
       apiKey: "AIzaSyDt5cJ0LIrZV5NGPS02QeEj9zogPyMm3Wg",
       authDomain: "goldprice-6db2e.firebaseapp.com",
@@ -91,193 +99,164 @@
     };
 
     const app  = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
     const db   = getFirestore(app);
+    const auth = getAuth(app);
 
-    // Fallback: claim না থাকলেও নির্দিষ্ট ইমেইলকে admin ধরুন
-    const ADMIN_EMAIL = 'anik3uro@gmail.com';
+    // ====== DOM refs (✔️ এখন সব সেফ) ======
+    const emailInput   = document.getElementById('email');
+    const passInput    = document.getElementById('password');
+    const btnLogin     = document.getElementById('btnLogin');
+    const loginMsg     = document.getElementById('loginMsg');
+    const loginBox     = document.getElementById('loginBox');
 
-    // UI refs
-    const loginForm  = document.getElementById('loginForm');
-    const whoami     = document.getElementById('whoami');
-    const whoEmail   = document.getElementById('whoEmail');
-    const whoRole    = document.getElementById('whoRole');
-    const btnSignOut = document.getElementById('btnSignOut');
-    const panel      = document.getElementById('panel');
-    const priceBody  = document.getElementById('priceBody');
-    const btnSave    = document.getElementById('btnSave');
-    const saveMsg    = document.getElementById('saveMsg');
-    const updatedAt  = document.getElementById('updatedAt');
+    const panel        = document.getElementById('panel');
+    const whoEmail     = document.getElementById('whoEmail');
+    const whoRole      = document.getElementById('whoRole');
+    const updatedAtEl  = document.getElementById('updatedAt');
 
-    // লেবেল ম্যাপ (key -> label)
+    const tbodyToday   = document.getElementById('tbody-today');
+    const tbodyOld     = document.getElementById('tbody-old');
+    const tbodyNew     = document.getElementById('tbody-new');
+
+    const btnSave      = document.getElementById('btnSave');
+    const saveMsg      = document.getElementById('saveMsg');
+
+    const ADMIN_EMAIL = 'anik3uro@gmail.com'; // fallback
+
+    const moneyFmt = new Intl.NumberFormat('bn-BD',{ style:'currency', currency:'BDT', maximumFractionDigits:0 });
     const LABELS = {
       price_24k_biscuit_bhori: '২৪K বিস্কুট / ভরি',
       price_24k_pasha_bhori:   '২৪K পাশা / ভরি',
       price_24k_biscuit_gram:  '২৪K বিস্কুট / গ্রাম',
+      // old
       price_old_22k_bhori:     'পুরাতন ২২K / ভরি',
       price_old_21k_bhori:     'পুরাতন ২১K / ভরি',
       price_old_22k_gram:      'পুরাতন ২২K / গ্রাম',
       price_old_21k_gram:      'পুরাতন ২১K / গ্রাম',
+      // new
       price_new_22k_bhori:     'নতুন ২২K / ভরি',
       price_new_21k_bhori:     'নতুন ২১K / ভরি',
       price_new_22k_gram:      'নতুন ২২K / গ্রাম',
       price_new_21k_gram:      'নতুন ২১K / গ্রাম',
     };
 
-    const moneyFmt = new Intl.NumberFormat('bn-BD', {
-      style:'currency', currency:'BDT', maximumFractionDigits:0
-    });
+    const GROUPS = {
+      today: ['price_24k_biscuit_bhori','price_24k_pasha_bhori','price_24k_biscuit_gram'],
+      old:   ['price_old_22k_bhori','price_old_21k_bhori','price_old_22k_gram','price_old_21k_gram'],
+      new:   ['price_new_22k_bhori','price_new_21k_bhori','price_new_22k_gram','price_new_21k_gram']
+    };
+
+    // key -> {curEl,input}
+    const rowMap = new Map();
+
+    function addRow(tbody, key){
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="px-3 py-2">${LABELS[key] || key}</td>
+        <td class="px-3 py-2 font-semibold" data-cur>—</td>
+        <td class="px-3 py-2">
+          <input class="w-32 px-2 py-1 rounded bg-white/10 outline-none" type="number" inputmode="numeric" placeholder="নতুন দাম">
+        </td>
+      `;
+      tbody.appendChild(tr);
+      const curEl = tr.querySelector('[data-cur]');
+      const input = tr.querySelector('input');
+      rowMap.set(key,{curEl,input});
+    }
+
+    // টেবিল স্ট্রাকচার তৈরি
+    function buildTables(){
+      GROUPS.today.forEach(key => addRow(tbodyToday, key));
+      GROUPS.old.forEach(key   => addRow(tbodyOld, key));
+      GROUPS.new.forEach(key   => addRow(tbodyNew, key));
+    }
+    buildTables();
 
     function fmtDhaka(ts){
       try{
         const d = ts?.toDate ? ts.toDate() : (ts instanceof Date ? ts : null);
-        return d ? d.toLocaleString('bn-BD',{ timeZone: 'Asia/Dhaka', dateStyle:'short', timeStyle:'medium' }) : '—';
+        return d ? d.toLocaleString('bn-BD',{ timeZone:'Asia/Dhaka', dateStyle:'short', timeStyle:'medium' }) : '—';
       }catch{ return '—'; }
     }
 
-    // DOM: একটি রো বানানো/খুঁজে আনা (key অনুযায়ী)
-    const rowMap = new Map(); // key -> {tr, curEl, input}
-    function ensureRow(key){
-      if(rowMap.has(key)) return rowMap.get(key);
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td class="px-3 py-2">${LABELS[key] || '—'}</td>
-        <td class="px-3 py-2 text-xs text-gray-300">${key}</td>
-        <td class="px-3 py-2 font-semibold" data-cur>—</td>
-        <td class="px-3 py-2">
-          <input class="w-40 max-w-full px-3 py-1.5 rounded-lg bg-white/10 outline-none" type="number" step="1" placeholder="নতুন দাম">
-        </td>
-      `;
-      priceBody.appendChild(tr);
-      const curEl = tr.querySelector('[data-cur]');
-      const input = tr.querySelector('input');
-      const obj = { tr, curEl, input };
-      rowMap.set(key, obj);
-      return obj;
-    }
-
-    // LIVE: prices collection subscribe (login-এর পর চালু হবে)
-    let unsubscribePrices = null;
-    async function startPricesLive(){
-      stopPricesLive();
-      unsubscribePrices = onSnapshot(collection(db,'prices'), (snap)=>{
-        snap.docs.forEach(d=>{
-          const data = d.data() || {};
-          const key  = data.key || d.id;
-          const price = typeof data.price === 'number' ? data.price : null;
-          const row = ensureRow(key);
-          if(price!=null){
-            row.curEl.textContent = moneyFmt.format(price).replace('৳\u00A0','৳');
-            row.tr.classList.add('animate-pulse'); // ছোট এনিমেশন
-            setTimeout(()=>row.tr.classList.remove('animate-pulse'),300);
-          }
-        });
-      }, (err)=>{
-        console.error('prices live error', err);
-      });
-    }
-    function stopPricesLive(){
-      if(typeof unsubscribePrices === 'function'){ unsubscribePrices(); }
-      unsubscribePrices = null;
-    }
-
-    // meta.site.updatedAt (Last update)
-    let unsubscribeMeta = null;
-    async function startMetaLive(){
-      stopMetaLive();
-      unsubscribeMeta = onSnapshot(doc(db,'meta','site'), (snap)=>{
-        const data = snap.data();
-        updatedAt.textContent = fmtDhaka(data?.updatedAt);
-      }, (err)=> console.error('meta live error', err));
-    }
-    function stopMetaLive(){
-      if(typeof unsubscribeMeta === 'function'){ unsubscribeMeta(); }
-      unsubscribeMeta = null;
-    }
-
-    // AUTH STATE
+    // ==== Auth state ====
     onAuthStateChanged(auth, async (user)=>{
       if(user){
+        // role/email চেক
         const token = await getIdTokenResult(user, true);
         const email = user.email || '';
         const isAdmin = (token.claims?.role === 'admin') || (email === ADMIN_EMAIL);
 
-        // UI toggle
-        loginForm.classList.add('hidden');
-        whoami.classList.remove('hidden');
         whoEmail.textContent = email;
-        whoRole.textContent  = isAdmin ? 'admin' : (token.claims?.role || '—');
+        whoRole.textContent  = isAdmin ? 'admin' : (token.claims?.role || 'user');
 
-        // Panel দেখান + লাইভ সাবস্ক্রিপশন চালু
+        // প্যানেল দেখান
+        loginBox.classList.add('hidden');
         panel.classList.remove('hidden');
-        await Promise.all([startPricesLive(), startMetaLive()]);
 
-        if(!isAdmin){
-          saveMsg.textContent = '⚠️ আপনি admin নন (role/email মিলেনি), লিখতে পারবেন না।';
-          saveMsg.className   = 'text-amber-400 text-sm';
-        }else{
-          saveMsg.textContent = '';
-          saveMsg.className   = 'text-green-400 text-sm';
-        }
-      }else{
-        // UI reset
+        // Live prices
+        onSnapshot(collection(db,'prices'), (snap)=>{
+          snap.docs.forEach(d=>{
+            const data = d.data() || {};
+            const key  = data.key || d.id;
+            const price = typeof data.price === 'number' ? data.price : null;
+            const row = rowMap.get(key);
+            if(row && price!=null){
+              row.curEl.textContent = moneyFmt.format(price).replace('৳\u00A0','৳');
+            }
+          });
+        });
+
+        // Last updated time
+        onSnapshot(doc(db,'meta','site'), (snap)=>{
+          updatedAtEl.textContent = fmtDhaka(snap.data()?.updatedAt);
+        });
+
+      } else {
         panel.classList.add('hidden');
-        loginForm.classList.remove('hidden');
-        whoami.classList.add('hidden');
-        whoEmail.textContent = '';
-        whoRole.textContent  = '—';
-        saveMsg.textContent  = '';
-        saveMsg.className    = '';
-        priceBody.innerHTML  = '';
-        stopPricesLive();
-        stopMetaLive();
+        loginBox.classList.remove('hidden');
       }
     });
 
-    // SIGN IN
-    loginForm?.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const email = document.getElementById('email').value.trim();
-      const pass  = document.getElementById('password').value.trim();
+    // ==== Login click ====
+    btnLogin.addEventListener('click', async ()=>{
+      loginMsg.textContent = '';
+      const email = emailInput.value.trim();
+      const pass  = passInput.value.trim();
+      if(!email || !pass){ loginMsg.textContent='ইমেইল/পাসওয়ার্ড দিন'; return; }
       try{
         await signInWithEmailAndPassword(auth, email, pass);
       }catch(err){
-        alert('Login failed: ' + (err?.code || err?.message || err));
+        loginMsg.textContent = err?.message || String(err);
       }
     });
 
-    // SIGN OUT
-    btnSignOut?.addEventListener('click', ()=> signOut(auth));
-
-    // SAVE ALL
-    btnSave?.addEventListener('click', async ()=>{
+    // ==== Save All ====
+    btnSave.addEventListener('click', async ()=>{
       try{
         const user = auth.currentUser;
-        if(!user){ alert('আগে সাইন-ইন করুন।'); return; }
+        if(!user){ saveMsg.textContent='আগে লগইন করুন'; saveMsg.className='text-red-400'; return; }
+
         const token = await getIdTokenResult(user, true);
         const email = user.email || '';
         const isAdmin = (token.claims?.role === 'admin') || (email === ADMIN_EMAIL);
-        if(!isAdmin){ alert('আপনি admin নন (role/email মিলেনি)'); return; }
+        if(!isAdmin){ saveMsg.textContent='আপনি admin নন'; saveMsg.className='text-amber-400'; return; }
 
-        // প্রতিটি রো থেকে ইনপুট পড়ে লিখুন
-        for(const [key] of Object.entries(LABELS)){
-          const row = rowMap.get(key);
-          if(!row) continue;
-          const raw = (row.input.value||'').trim();
-          if(raw==='') continue;
+        for(const [key,obj] of rowMap){
+          const raw = (obj.input.value||'').trim();
+          if(!raw) continue;
           const num = Number(raw);
           if(!Number.isFinite(num)) throw new Error(`Invalid number for ${key}`);
-          await setDoc(doc(db,'prices', key), { key, price: num }, { merge:true });
-          row.input.value = ''; // clear after save
+          await setDoc(doc(db,'prices', key), { key, price:num }, { merge:true });
+          obj.input.value = '';
         }
-        // meta.updatedAt
         await setDoc(doc(db,'meta','site'), { updatedAt: serverTimestamp() }, { merge:true });
 
         saveMsg.textContent = '✅ Saved!';
-        saveMsg.className   = 'text-green-400 text-sm';
+        saveMsg.className   = 'text-green-400';
       }catch(err){
-        saveMsg.textContent = '❌ Save error';
-        saveMsg.className   = 'text-red-400 text-sm';
+        saveMsg.textContent = '❌ ' + (err?.message || err);
+        saveMsg.className   = 'text-red-400';
         console.error(err);
       }
     });
